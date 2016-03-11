@@ -64,14 +64,14 @@ teorinis <- function(x){
 
 y = es2$Asuma
 
-# Funkcija, kuri parodo norimos i6kritusios sumos empyrinę tikimybę
+# Funkcija, kuri parodo norimos iškritusios sumos empyrinę tikimybę
 empyrinis <- function(y){  
   es2[es2$Asuma == y,]
 }
 
 # Įrašoma norima iškritusių akučių suma
 
-empyrinis(18)  
-teorinis(18)
+empyrinis(y)  
+teorinis(x)
 
 ```
