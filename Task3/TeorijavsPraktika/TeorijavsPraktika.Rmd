@@ -1,0 +1,75 @@
+---
+title: "Task 3"
+author: "Izabele Vilkinaite"
+date: "2016 m. vasaris 29 d."
+output: html_document
+---
+
+## Teorija Vs Praktika
+
+Ridename 4 kauliukus. Suskaičiuokite jų teorinį skirstinį ir patikrinkite jį su empiriniu skirstiniu, gautu Monte Carlo metodu.
+
+#### Teorinis skirstinys
+
+```{r}
+
+#Sudaroma keturių kauliukų matrica su iškritusių akučių sumomis
+valuesMat2 = outer(2:12, 2:12, "+") 
+
+#Kiekvienos reikšmės tikimybės
+probMat2 = outer(rep(1/36, 11), rep(1/36, 11), "*")
+
+#Iškritusių akučių sumos tikimybės
+Tikimybe=tapply(as.vector(probMat2), as.vector(valuesMat2), sum)
+
+#Bendra gautų rezultatų lentelė
+ts2=data.frame(Tikimybe) 
+ts2["Asuma"] <- c(4:24) 
+ts2 <- ts2[c(2,1)]
+
+```
+
+#### Empyrinis skirstinys
+
+```{r} 
+
+#Funkcija, kuri išmeta 4 kauliukų akučių sumą 
+rollDice <- function(){  
+ sum(sample(1:6, size=4 , replace=TRUE)) 
+}
+
+# Gaunama 1000 tokių sumų
+y = replicate(1000, rollDice()) 
+# Suskaičiuojama kiek vienodų sumų iškrito 
+tb=table(y) 
+
+# Kiekvienos sumos iškritimo tikimybės
+es=tb/sum(tb) 
+
+#Bedra gautų rezultatų lentelė
+es2=data.frame(es)
+colnames(es2)=c("Asuma", "Tikimybe")
+```
+
+### Palyginimas
+
+```{r}
+x = ts2$Asuma
+
+# Funkcija, kuri parodo norimos iškritusios sumos teorinę tikimybę
+teorinis <- function(x){   
+  ts2[ts2$Asuma == x, ]
+}
+
+y = es2$Asuma
+
+# Funkcija, kuri parodo norimos iškritusios sumos empyrinę tikimybę
+empyrinis <- function(y){  
+  es2[es2$Asuma == y,]
+}
+
+# Įrašoma norima iškritusių akučių suma
+
+empyrinis(y)  
+teorinis(x)
+```
