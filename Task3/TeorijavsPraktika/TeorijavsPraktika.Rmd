@@ -15,18 +15,18 @@ Ridename 4 kauliukus. Suskaičiuokite jų teorinį skirstinį ir patikrinkite j�
 
 #Sudaroma keturių kauliukų matrica su iškritusių akučių sumomis
 valuesMat2 = outer(2:12, 2:12, "+") 
-valuesMat2
+
 #Kiekvienos reikšmės tikimybės
 probMat2 = outer(rep(1/36, 11), rep(1/36, 11), "*")
-probMat2
+
 #Iškritusių akučių sumos tikimybės
 Tikimybe=tapply(as.vector(probMat2), as.vector(valuesMat2), sum)
-Tikimybe
+
 #Bendra gautų rezultatų lentelė
 ts2=data.frame(Tikimybe) 
 ts2["Asuma"] <- c(4:24) 
 ts2 <- ts2[c(2,1)]
-ts2 
+ 
 
 ```
 
@@ -41,14 +41,14 @@ rollDice <- function(){
 y = replicate(1000, rollDice()) # Gaunama 1000 tokių sumų
 # Suskaičiuojama kiek vienodų sumų iškrito 
 tb=table(y) 
-tb
+
 # Kiekvienos sumos iškritimo tikimybės
 es=tb/sum(tb) 
-es
+
 #Bedra gautų rezultatų lentelė
 es2=data.frame(es)
 colnames(es2)=c("Asuma", "Tikimybe")
-es2 
+
 
 ```
 
