@@ -1,0 +1,31 @@
+---
+title: "Task3"
+author: "Izabele Vilkinaite"
+date: "2016 m. kovas 12 d."
+output: html_document
+---
+
+### CRT
+
+Generuojame n atsitiktinių dydžių turinčių Beta skirstinį su parametrais α=β=0.5. Iš šių atsitiktinių dydžių suskaičiuojamas aritmetinis vidurkis. Kaip atrodo vidurkio tankis, kai n=100?
+
+#### Programos kodas
+
+```{r}
+
+#Funkcija, duodanti sugeneruoto dydžio n vidurkį pagal Betą skirstinį
+vidurkis <- function(n){
+  mean(rbeta(n, 0.5, 0.5))
+}
+
+#Gauname 1000 vidurkio realizacijų, kai n=100
+x = replicate(1000, vidurkis(100))
+
+#Išbrėžiame histogramą ir tankio kreivę
+hist(x, main = "Vidurkio tankis", xlab = "Vidurkio reikšmės", ylab = "Tankis", probability =  TRUE)
+lines(density(x), col=3, lwd=2)
+
+```
+
+
+Grafikas parodo, kad vidurkio tankis yra panašus į normalujį. Vidurkio reikšmės yra arti teorinės 0.5 reikšmės. 
