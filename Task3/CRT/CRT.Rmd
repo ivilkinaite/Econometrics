@@ -28,4 +28,4 @@ lines(density(x), col=3, lwd=2)
 ```
 
 
-Grafikas parodo, kad vidurkio tankis yra panašus į normalujį. Vidurkio reikšmės yra arti teorinės 0.5 reikšmės. 
+Grafikas parodo, kad vidurkio tankis yra panašus į normalųjį. Vidurkio reikšmės yra arti teorinės 0.5 reikšmės. 
