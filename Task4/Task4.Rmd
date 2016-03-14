@@ -25,8 +25,8 @@ plot(mod1) # Modelis yra tiesiškas
 ####3.Iš grafikų pastebime, kad duomenyse yra išskirčių, todėl jas surandame ir pašaliname
 ```{r}
 library(car)
-outlierTest(mod1)
-data1 <- data[-c(253,254),]
+outlierTest(mod1)            #Išskirtys: 253 ir 254
+data1 <- data[-c(253,254),]  #Išmetame iš duomenų
 ```
 
 ####4. Sudarome modelį be išskirčių
@@ -38,7 +38,7 @@ mod2 = lm(kaina ~ plotas + aukstas + garsoIzoliacija + silumosLaidumas + atstuma
 ```{r}
 vif(mod2)
 ```
-##### Pastebime, kad garso izoliacija ir šilumos laidumas koreliuoja, nes vif>10. Vadinasi galime pašalinti vieną  iš kintamųjų. Pažiūrėsime, su kuriuo kintamuoju modelis yra geresnis.
+##### Pastebime, kad garso izoliacija ir šilumos laidumas multikolinearūs, nes vif>10. Vadinasi galime pašalinti vieną  iš kintamųjų. Sudarome du modelius su kiekvienu iš kintamųjų ir patikriname, kuris modelis geresnis.
 ```{r}
 mod3 = lm(kaina ~ plotas + aukstas + garsoIzoliacija + atstumasIkiPrekybosCentro, data=data1)
 mod4 = lm(kaina ~ plotas + aukstas + silumosLaidumas + atstumasIkiPrekybosCentro, data=data1)
