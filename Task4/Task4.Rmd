@@ -91,7 +91,7 @@ durbinWatsonTest(mod5)
 mod5 = lm(kaina ~ plotas + aukstas + garsoIzoliacija, data=data2)
 summary(mod5)
 ```
- Gavome, kad būsto kainai įtakos turi plotas, namo aukštas ir garso izoliacija. Vadinasi:
- 1) Plotui padidėjus 1kv.m, o aukštui ir garso izoliacijai išlikus pastoviems, būsto kaina padidėja 599.44.
- 2) Vienam aukštui padidėjus, o plotui ir garso izoliacijai išlikus pastoviems, būsto kaina padidėja 333.97.
- 3)Garso izoliaciją padidinus vienu vienetu,o plotą ir aukštą paliekant pastovius, kaina padidėja 581.21. 
+ Gavome, kad būsto kainai įtakos turi plotas, namo aukštas ir garso izoliacija. Vadinasi:  
+ 1) Plotui padidėjus 1kv.m, o aukštui ir garso izoliacijai išlikus pastoviems, būsto kaina padidėja 599.44.  
+ 2) Vienam aukštui padidėjus, o plotui ir garso izoliacijai išlikus pastoviems, būsto kaina padidėja 333.97.  
+ 3)Garso izoliaciją padidinus vienu vienetu,o plotą ir aukštą paliekant pastovius, kaina padidėja 581.21.   
