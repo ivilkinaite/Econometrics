@@ -1,0 +1,97 @@
+---
+title: "Task4"
+author: "Izabele Vilkinaite"
+date: "2016 m. kovas 12 d."
+output: html_document
+---
+
+## Užduotis
+
+Atlikti išsamią tiesinę regresiją. Lygtis reikalinga prekybos agentams, kad geriau suprastų kokią įtaką skirtingos charakteristikos daro galutinei kainai.
+
+####1.Nuskanuojame duomenis
+```{r}
+data = read.csv2(file="data.csv", header = TRUE)
+attach(data)
+```
+
+####2.Sudarome bendrą modelį ir išbrėžiame grafikus
+```{r}
+mod1=lm(kaina ~ plotas + aukstas + garsoIzoliacija + silumosLaidumas + atstumasIkiPrekybosCentro)
+par(mfrow=c(2,2))
+plot(mod1) # Modelis yra tiesiškas
+```
+
+####3.Iš grafikų pastebime, kad duomenyse yra išskirčių, todėl jas surandame ir pašaliname
+```{r}
+library(car)
+outlierTest(mod1)
+data1 <- data[-c(253,254),]
+```
+
+####4. Sudarome modelį be išskirčių
+```{r}
+mod2 = lm(kaina ~ plotas + aukstas + garsoIzoliacija + silumosLaidumas + atstumasIkiPrekybosCentro, data=data1)
+```
+
+####5.Tikriname, ar kintamieji yra multikolinearūs
+```{r}
+vif(mod2)
+```
+##### Pastebime, kad garso izoliacija ir šilumos laidumas koreliuoja, nes vif>10. Vadinasi galime pašalinti vieną  iš kintamųjų. Pažiūrėsime, su kuriuo kintamuoju modelis yra geresnis.
+```{r}
+mod3 = lm(kaina ~ plotas + aukstas + garsoIzoliacija + atstumasIkiPrekybosCentro, data=data1)
+mod4 = lm(kaina ~ plotas + aukstas + silumosLaidumas + atstumasIkiPrekybosCentro, data=data1)
+
+#Tikriname pagal AIC kriterijų
+AIC(mod3)
+AIC(mod4) 
+#AIC(mod3)<AIC(mod4)
+
+#Tikriname pagal Schwarz kriterijų
+BIC(mod3)
+BIC(mod4) 
+#BIC(mod3)<BIC(mod4)
+```
+#####Abiem atvejais gavome, kad 3 modelis yra geresnis nei 4, vadinasi iš duomenų išmesime šilumos laidumą.
+```{r}
+data2 = data1[,-5]
+mod3 = lm(kaina ~ plotas + aukstas + garsoIzoliacija + atstumasIkiPrekybosCentro, data=data2)
+summary(mod3)
+```
+#####Atlikę kintamųjų reikšmingumo analizę, iš modelio galime taip pat išmesti kintamąjį, nusakantį atstumą iki prekybos centro.
+```{r}
+mod5 = lm(kaina ~ plotas + aukstas + garsoIzoliacija, data=data2)
+summary(mod5) #Visi kintamieji reikšmingi
+```
+####6.Tikriname heteroskedastiškumą
+```{r}
+par(mfrow=c(2,2))
+plot(mod5)
+#Viršutinėje dešinėje grafiko pusėje matome, kad paklaidų sklaida atrodo homoskedastiška ir normaliai pasiskirsčiusi. Tačiau tam tiksliai patikrinti naudosime ncvTest, su hipotezėmis:
+
+#H0:Paklaidų sklaida homoskedastiška;   priimame, kai p-value > 0.05
+#H1:Paklaidų sklaida heteroskedastiška; priimame, kai p-value < 0.05
+
+ncvTest(mod5)
+#Kadangi p-value > 0.05, tai H0 hipotezę priimame, todėl paklaidų sklaida yra homoskedastiška.
+```
+####7. Tikriname autokoreliaciją
+```{r}
+#Autokoreliacijoms patikrinti naudosime durbinWatsonTest, su hipotezėmis:
+
+#H0: Autokoreliacijos nėra; priimame, kai p-value > 0.05
+#H1: Autokoreliacija yra;   priimame, kai p-value < 0.05
+
+durbinWatsonTest(mod5)
+#Kadangi p-value > 0.05, vadinasi H0 hipotezę priimane. Autokoreliacijos nėra. 
+```
+#### Galutinis sutvarkytas modelis:
+```{r}
+mod5 = lm(kaina ~ plotas + aukstas + garsoIzoliacija, data=data2)
+summary(mod5)
+```
+#### Gavome, kad būsto kainai įtakos turi plotas, namo aukštas ir garso izoliacija. Vadinasi:
+#### 1) Plotui padidėjus 1kv.m, o aukštui ir garso izoliacijai išlikus pastoviems, būsto kaina padidėja 599.44.
+#### 2) Vienam aukštui padidėjus, o plotui ir garso izoliacijai išlikus pastoviems, būsto kaina padidėja 333.97.
+#### 3)Garso izoliaciją padidinus vienu vienetu,o plotą ir aukštą paliekant pastovius, kaina padidėja 581.21. 
