@@ -78,4 +78,4 @@ qqline(mod5$res)
 
 #Nukrypimai nuo tiesės yra minimalūs, vadinasi paklaidos yra normalios. 
 ```
-Atsižvelgiant į atliktų modelių analizę, pasirinktas modelis mod5 yra ištiesų geras. 
+###Atsižvelgiant į atliktų modelių analizę, pasirinktas modelis mod5 yra ištiesų geras. 
