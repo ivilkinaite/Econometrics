@@ -1,0 +1,81 @@
+---
+title: "Task 5"
+author: "Izabele Vilkinaite"
+date: '2016 m kovas 20 d '
+output: html_document
+---
+## Užduotis
+
+Pinigų paklausa. Šioje užduotyje reikia atlikti tiesinę regresiją. Pakete dynlm yra duomenų masyvas M1Germany - ten yra ir jo aprašymas. Iš turimų duomenų sudarykite ir įvertinkite tiesinę regresiją, kurios endogeninis kintamasis yra logm1. Lygtis būtų naudojama prognozuoti pinigų kiekį artimiausiam laikotarpiui į prieki remiantis dabartine situacija. Taigi prognozės sudarymui lygtis gali naudoti tik tuos duomenis, kurie būtų žinomi prognozavimo momentu.
+
+####5.1 Atsidarome duomenų masyvą ir jį išbrėžiame
+
+library(dynlm)  
+library(car)  
+M1Germany    
+plot(M1Germany)    
+
+####5.2 Atliekame tiesinę regresiją iš turimų duomenų 
+####5.2.1 Sukuriame kelis modelius
+
+mod0 = dynlm(logm1 ~ L(logprice, 1) + L(loggnp, 1) + L(interest, 1) + L(logm1, 1), data=M1Germany)
+summary(mod0)
+vif(mod0) 
+
+#####Iš gautų duomenų matome, kad loggnp nėra reikšmingas, o patikrinus modelio multikolinearumą, kai kurie kintamieji koreliuoja. Tam, kad išvengtumėme multikoliniarumo, koreliuojančius duomenis išmesime arba pritaikysime funkciją diff (arba d()), kuri panaikina modelio trendą.
+
+mod1 = dynlm(logm1 ~ (d(L(logprice, 2))) + L(loggnp, 2) + L(interest, 2), data=M1Germany)  
+summary(mod1)  
+vif(mod1)  
+
+mod2 = dynlm(logm1 ~ L(logprice, 2) + (d(L(loggnp, 2))) + L(interest, 2), data=M1Germany)  
+summary(mod2)  
+vif(mod2)  
+
+mod3 = dynlm(logm1 ~ L(loggnp, 1) + L(interest, 1) + (d(L(logm1, 1))), data=M1Germany)
+summary(mod3)  
+vif(mod3)  
+
+mod4 = dynlm(logm1 ~ L(loggnp, 3) + L(interest, 3), data=M1Germany)  
+summary(mod4)  
+vif(mod4)  
+
+mod5 = dynlm(logm1 ~ L(logprice, 3) + L(interest, 3), data=M1Germany)  
+summary(mod5)   
+vif(mod5)  
+
+mod6 = dynlm(logm1 ~ (d(L(logprice, 4))) + L(loggnp, 4), data=M1Germany)  
+summary(mod6)  
+vif(mod6)  
+
+####5.2.2 Kadangi modeliuose nėra multikolinearumo ir visi kintamieji reikšmingi, tikriname, kuris modelis geriausias pagal AIC kriterijų:
+
+AIC(mod1)  
+AIC(mod2)  
+AIC(mod3)  
+AIC(mod4)  
+AIC(mod5)  
+AIC(mod6)  
+
+##### Gauname, kad mod5 yra geriausias. 
+####5.2.3 Atlieka šio modelio analizę, įsitikindami, ar jis tikrai tinkamas.
+####5.2.3.1 Tikriname liekanų normalumą
+
+#####Naudojame Shapiro-Wilks test'a su hipotezėmis:   
+#####H0: Liekanos normaliai išsidėsčiusios;      priimame, kai p-value > 0.05  
+#####H1: Liekanos nėra normaliai išsidėščiusios; priimane, kai p-value < 0.05
+
+
+```{r}
+library(dynlm)
+mod5 = dynlm(logm1 ~ L(logprice, 3) + L(interest, 3), data=M1Germany) 
+res = as.vector(mod5$residuals)  
+shapiro.test(res) 
+#Kadangi p-value > 0.05, tai H0 hipoteze priimame. Liekanos normaliai išsidėščiusios.Išbrėžiame grafiką.
+
+qqnorm(mod5$res)
+qqline(mod5$res)
+
+#Nukrypimai nuo tiesės yra minimalūs, vadinasi paklaidos yra normalios. 
+```
+#####Atsižvelgiant į atliktų modelių analizę, pasirinktas modelis mod5 yra ištiesų geras. 
