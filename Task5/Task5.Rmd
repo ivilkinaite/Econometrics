@@ -58,7 +58,7 @@ AIC(mod5)
 AIC(mod6)  
 
 ##### Gauname, kad mod5 yra geriausias. 
-####5.2.3 Atlieka šio modelio analizę, įsitikindami, ar jis tikrai tinkamas.
+####5.2.3 Atliekame šio modelio analizę, įsitikindami, ar jis tikrai tinkamas.
 ####5.2.3.1 Tikriname liekanų normalumą
 
 #####Naudojame Shapiro-Wilks test'a su hipotezėmis:   
