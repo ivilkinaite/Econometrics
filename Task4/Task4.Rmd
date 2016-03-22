@@ -68,7 +68,8 @@ summary(mod5) #Visi kintamieji reikšmingi
 ```{r}
 par(mfrow=c(2,2))
 plot(mod5)
-#Viršutinėje dešinėje grafiko pusėje matome, kad paklaidų sklaida atrodo homoskedastiška ir normaliai pasiskirsčiusi. Tačiau tam tiksliai patikrinti naudosime ncvTest, su hipotezėmis:
+#Viršutinėje dešinėje grafiko pusėje matome, kad paklaidų sklaida atrodo homoskedastiška ir normaliai pasiskirsčiusi.
+#Tačiau tam tiksliai patikrinti naudosime ncvTest, su hipotezėmis:
 
 #H0:Paklaidų sklaida homoskedastiška;   priimame, kai p-value > 0.05
 #H1:Paklaidų sklaida heteroskedastiška; priimame, kai p-value < 0.05
