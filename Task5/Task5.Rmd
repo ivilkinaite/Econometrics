@@ -61,12 +61,11 @@ AIC(mod6)
 ```
 5.2.3 Atliekame šio modelio analizę, įsitikindami, ar jis tikrai tinkamas.  
 5.2.3.1 Tikriname liekanų normalumą  
-
-Naudojame Shapiro-Wilks test'a su hipotezėmis:     
-H0: Liekanos normaliai išsidėsčiusios;      priimame, kai p-value > 0.05    
-H1: Liekanos nėra normaliai išsidėščiusios; priimane, kai p-value < 0.05  
-
 ```{r}
+#Naudojame Shapiro-Wilks test'a su hipotezėmis:     
+#H0: Liekanos normaliai išsidėsčiusios;      priimame, kai p-value > 0.05    
+#H1: Liekanos nėra normaliai išsidėščiusios; priimane, kai p-value < 0.05  
+
 library(dynlm)
 mod5 = dynlm(logm1 ~ L(logprice, 3) + L(interest, 3), data=M1Germany) 
 res = as.vector(mod5$residuals)  
@@ -78,4 +77,4 @@ qqline(mod5$res)
 
 #Nukrypimai nuo tiesės yra minimalūs, vadinasi paklaidos yra normalios. 
 ```
-###Atsižvelgiant į atliktų modelių analizę, pasirinktas modelis mod5 yra ištiesų geras. 
+####Atsižvelgiant į atliktų modelių analizę, pasirinktas modelis mod5 yra ištiesų geras. 
