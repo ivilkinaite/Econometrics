@@ -16,14 +16,13 @@ M1Germany
 plot(M1Germany)    
 ```
 
-5.2 Atliekame tiesinę regresiją iš turimų duomenų 
+5.2 Atliekame tiesinę regresiją iš turimų duomenų   
 5.2.1 Sukuriame kelis modelius
 ```{r}
 mod0 = dynlm(logm1 ~ L(logprice, 1) + L(loggnp, 1) + L(interest, 1) + L(logm1, 1), data=M1Germany)
 summary(mod0)
 vif(mod0) 
-{r}
-
+```
 Iš gautų duomenų matome, kad loggnp nėra reikšmingas, o patikrinus modelio multikolinearumą, kai kurie kintamieji koreliuoja. Tam, kad išvengtumėme multikoliniarumo, koreliuojančius duomenis išmesime arba pritaikysime funkciją diff (arba d()), kuri panaikina modelio trendą.
 ```{r}
 mod1 = dynlm(logm1 ~ (d(L(logprice, 2))) + L(loggnp, 2) + L(interest, 2), data=M1Germany)  
@@ -60,12 +59,12 @@ AIC(mod5)
 AIC(mod6)  
 #Gauname, kad mod5 yra geriausias. 
 ```
-5.2.3 Atliekame šio modelio analizę, įsitikindami, ar jis tikrai tinkamas.
-5.2.3.1 Tikriname liekanų normalumą
+5.2.3 Atliekame šio modelio analizę, įsitikindami, ar jis tikrai tinkamas.  
+5.2.3.1 Tikriname liekanų normalumą  
 
-Naudojame Shapiro-Wilks test'a su hipotezėmis:   
-H0: Liekanos normaliai išsidėsčiusios;      priimame, kai p-value > 0.05  
-H1: Liekanos nėra normaliai išsidėščiusios; priimane, kai p-value < 0.05
+Naudojame Shapiro-Wilks test'a su hipotezėmis:     
+H0: Liekanos normaliai išsidėsčiusios;      priimame, kai p-value > 0.05    
+H1: Liekanos nėra normaliai išsidėščiusios; priimane, kai p-value < 0.05  
 
 ```{r}
 library(dynlm)
