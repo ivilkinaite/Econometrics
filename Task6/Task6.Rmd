@@ -1,0 +1,63 @@
+---
+title: "Task 6"
+author: "Izabele Vilkinaite"
+date: '2016 m balandis 6 d '
+output: html_document
+---
+
+```{r}
+library(fpp) #paketas reikalingas duomenų analizei
+```
+###Užduotys
+
+Use the Dow Jones index (data set dowjones) to do the following steps.
+
+```{r}
+data = dowjones
+```
+
+####(a) Produce a time plot of the series.
+
+```{r}
+plot(data, main="Dow Jones duomenų kitimas laike", xlab="Laikas", ylab="Duomenys", col.main= "firebrick", font.main=6)
+```
+
+#####Grafikas parodo, kad duomenys nekinta pastovesniu dydžiu, yra ganėtinai spartus augimas ir menkas mažėjimas. 
+####(b) Produce forecasts using the drift method and plot them.
+
+```{r}
+plot(rwf(data, drift = T, h=20), main="Drift metodo prognozės", col.main="firebrick", font.main=6, xlab="Laikas", ylab="Duomenys")
+```
+
+#####Taikant Drift metodą, grafike matomas tendencingas duomenų kilimas. Atsižvelgiant į tai, kad per visą stebimą laikotarpį duomenys daugiau kilo nei mažėjo, prognozės pagal šį metodą yra pakankamai geros, nes vertinamos tiek paskutinės duomenų reikšmės, tiek vidurkio pokytis. Todėl duomenys įgaus didesnę tikimybę kilti, nei sumažėti. 
+
+####(c) Show that the graphed forecasts are identical to extending the line drawn between the first and last observations.
+
+```{r}
+#Pagal formulę (y2-y1)/(x2-x1) apskaičiuojame nuolydį tarp pirmos ir paskutinės duomenų reikšmės
+slope = (data[78]-data[1])/(77)
+
+#Išbrėžiame grafiką ir pridedame pratęstą liniją tarp pirmos ir paskutinės duomenų reikšmės
+plot(rwf(data, drift = T, h=20), main="Drift metodo prognozės", col.main="firebrick", font.main=6, xlab="Laikas", ylab="Duomenys")
+abline(data[1]-slope, slope, col="firebrick")
+```
+
+#####Gautas grafikas parodo, kad pratęsta linija, jungianti pirmą ir paskutinę reikšmes, sutampa su prognozėmis gautomis Drift metodu.
+
+#### (d) Try some of the other benchmark functions to forecast the same data set. Which do you think is best? Why?
+
+```{r}
+#Sudarome ankstesnio laiko duomenis, kad galėtumėme pažiūrėti, kuris metodas padarė geriausią prognozę likusiam laikotarpiui
+ddata = window(data, end=65) 
+plot(data, main="Dow Jones duomenų grafikas laike", xlab="Laikas", ylab="Duomenys", col.main= "firebrick", font.main=6)
+#Mean metodas
+lines(meanf(ddata, h=20)$mean, col="forestgreen", lwd=2)
+#Naive metodas
+lines(naive(ddata, h=20)$mean, col="gold", lwd=2)
+#Drift metodas
+lines(rwf(ddata, drift=T, h=20)$mean, col="dodgerblue", lwd=2)
+
+legend("topleft", legend=c("Mean", "Naive", "Drift"), col=c("forestgreen",  "gold", "dodgerblue"), lwd=2)
+```
+
+#####Kadangi mūsų duomenyse nėra sezoniškumo, šio metodo nenaudojame. Pagal gautus rezultatus, geriausiai taikomas metodas būtų Naive, nes prognozės daromos atsižvelgiant į paskutinę nustatyto laikotarpio reikšmę ir labiausiai atitiko likusio laikotarpio rezultatus. Tačiau ilgesnio laikotarpio prognozėms būtų greičiausiai klaidingas. Vidurkio metodas sunkiau pritaikomas, kadangi duomenys kito plačiame intervale ir nevienodu dydžiu, todėl gautas rezultatas netikslus. Drift metodas šiuo atveju taip pat prognozuoja klaidingai, nes atsižvelgiama į didesnį tikimybę duomenims kilti, nei mažėti.
