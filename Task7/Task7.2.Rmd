@@ -1,5 +1,5 @@
 ---
-title: "Task 7.2"
+title: "Task 7"
 author: "Izabele Vilkinaite"
 date: '2016 m balandis'
 output: html_document
@@ -12,7 +12,7 @@ library(fpp)
 ##Užduotys 
 2. For each of the series (bricksq, ibmclose, hsales) do the following steps:
 
-####**(a)** *Use either the naive or seasonal naive forecasting method and apply it to the full data set.*
+**(a)** *Use either the naive or seasonal naive forecasting method and apply it to the full data set.*
 
 ```{r} 
 par(mfrow=c(3,2))
@@ -30,17 +30,17 @@ plot(naive(hsales, h=20), main="Naive metodo grafikas hsales", col.main="darkgol
 plot(snaive(hsales, h=20), main="Seasonal naive grafikas hsales", col.main="darkgoldenrod1", font.main=6)
 ```
 
-#####**Laiko eilutės bricksq grafikai:** išlaikant sezoniškumą seasonal naive grafikas yra tinkamesnis ir šio metodo prognozės atrodo realesnės, tinkamesnės.  
-#####**Laiko eilutės ibmclose grafikai:** kadangi duomenyse nėra sezoniškumo, tai pakanka naudoti naive metodą.  
-#####**Laiko eilutės hsales grafikai:** prognozės labiau tinkamos gautos seasonal naive metodu, nes išlaikomas duomenų sezoniškumas.
+Laiko eilutės bricksq grafikai: išlaikant sezoniškumą seasonal naive grafikas yra tinkamesnis ir šio metodo prognozės atrodo realesnės, tinkamesnės.  
+Laiko eilutės ibmclose grafikai: kadangi duomenyse nėra sezoniškumo, tai pakanka naudoti naive metodą.
+Laiko eilutės hsales grafikai: prognozės labiau tinkamos gautos seasonal naive metodu, nes išlaikomas duomenų sezoniškumas.
 
-####**(b)** *Compute the residuals and plot their ACF. Do the residuals appear to be white noise? What did your forecasting method miss?*
+**(b)** *Compute the residuals and plot their ACF. Do the residuals appear to be white noise? What did your forecasting method miss?*
 
 ```{r}
 #bricksq paklaidos ir ACF
 
-res1 = residuals(snaive(bricksq, h=20))
 par(mfrow=c(2,1))
+res1 = residuals(snaive(bricksq, h=20))
 plot(res1, main="bricksq paklaidos", xlab="Laikotarpis", ylab="Paklaidos")
 Acf(res1, main="bricksq paklaidų autokoreliacijos")
 ```
@@ -69,7 +69,7 @@ Acf(res3, main="hsales paklaidų autokoreliacijos")
 
 Grafikas rodo, kad pirmose laguose autokoreliacija yra reikšminga, todėl paklaidos nėra baltasis triukšmas. Visgi duomenyse kas 7-9 metus yra pasikartojantis cikliškumas, kurio seasonal naive metodas neįvertina ir prognozės išlieka ne tokios tikslios.
 
-####**(c)** Do a Ljung-Box test on the residuals. What do the results mean?
+**(c)** Do a Ljung-Box test on the residuals. What do the results mean?
 
 Ljung-Box testo hipotezės:
 ```{r}
