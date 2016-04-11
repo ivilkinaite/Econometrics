@@ -1,0 +1,100 @@
+---
+title: "Task 7.2"
+author: "Izabele Vilkinaite"
+date: '2016 m balandis'
+output: html_document
+---
+
+```{r}
+library(fpp)
+```
+
+##Užduotys 
+2. For each of the series (bricksq, ibmclose, hsales) do the following steps:
+
+####**(a)** *Use either the naive or seasonal naive forecasting method and apply it to the full data set.*
+
+```{r} 
+par(mfrow=c(3,2))
+
+#bricksq
+plot(naive(bricksq, h=20), main="Naive metodo grafikas bricksq", col.main="blue4", font.main=6)
+plot(snaive(bricksq, h=20), main="Seasonal naive grafikas bricksq", col.main="blue4", font.main=6)
+
+#ibmclose
+plot(naive(ibmclose, h=20), main="Naive metodo grafikas ibmclose", col.main="firebrick4", font.main=6)
+plot(snaive(ibmclose, h=20), main="Seasonal naive grafikas ibmclose", col.main="firebrick4", font.main=6)
+
+#hsales
+plot(naive(hsales, h=20), main="Naive metodo grafikas hsales", col.main="darkgoldenrod1", font.main=6)
+plot(snaive(hsales, h=20), main="Seasonal naive grafikas hsales", col.main="darkgoldenrod1", font.main=6)
+```
+
+#####**Laiko eilutės bricksq grafikai:** išlaikant sezoniškumą seasonal naive grafikas yra tinkamesnis ir šio metodo prognozės atrodo realesnės, tinkamesnės.  
+#####**Laiko eilutės ibmclose grafikai:** kadangi duomenyse nėra sezoniškumo, tai pakanka naudoti naive metodą.  
+#####**Laiko eilutės hsales grafikai:** prognozės labiau tinkamos gautos seasonal naive metodu, nes išlaikomas duomenų sezoniškumas.
+
+####**(b)** *Compute the residuals and plot their ACF. Do the residuals appear to be white noise? What did your forecasting method miss?*
+
+```{r}
+#bricksq paklaidos ir ACF
+
+res1 = residuals(snaive(bricksq, h=20))
+par(mfrow=c(2,1))
+plot(res1, main="bricksq paklaidos", xlab="Laikotarpis", ylab="Paklaidos")
+Acf(res1, main="bricksq paklaidų autokoreliacijos")
+```
+
+Grafike matoma, kad autokoreliacijos reikšmės aiškiai yra už 95% balto triukšmo autokoreliacijos ribos daugelyje lagų. Vadinasi paklaidos nėra baltas triukšmas. Seasonal naive metodas neįvertina duomenyse esančio trendo ir cikliškumo.
+
+```{r}
+#ibmclose paklaidos ir ACF
+
+par(mfrow=c(2,1))
+res2 = residuals(naive(ibmclose, h=20))
+plot(res2, main="ibmclose paklaidos", xlab="Laikotarpis", ylab="Paklaidos")
+Acf(res2, main="ibmclose paklaidų autokoreliacijos")
+```
+
+Grafike matoma, kad tik kelios autokoreliacijos yra reikšmingos. Paklaidos visgi panašios į baltąjį triukšmą, todėl darosi sudėtinga, norint pagerinti prognozes. Šiems duomenims taip pat būtų tinkama pritaikyti Drift metodą, nes matomas didelis duomenų sumažėjimas, todėl vidurkio pokytis šių duomenų prognozėms yra svarbus. Tačiau taikant šiuos abu metodus, paklaidos gaunamos tokios pat. 
+
+```{r}
+#hsales paklaidos ir ACF
+
+par(mfrow=c(2,1))
+res3=residuals(snaive(hsales, h=20))
+plot(res3, main="hsales paklaidos", xlab="Laikotarpis", ylab="Paklaidos")
+Acf(res3, main="hsales paklaidų autokoreliacijos")
+```
+
+Grafikas rodo, kad pirmose laguose autokoreliacija yra reikšminga, todėl paklaidos nėra baltasis triukšmas. Visgi duomenyse kas 7-9 metus yra pasikartojantis cikliškumas, kurio seasonal naive metodas neįvertina ir prognozės išlieka ne tokios tikslios.
+
+####**(c)** Do a Ljung-Box test on the residuals. What do the results mean?
+
+Ljung-Box testo hipotezės:
+```{r}
+#H0: paklaidos yra baltasis triukšmas.
+#H1: paklaidos nėra baltasis triukšmas.
+```
+
+**_bricksq_**
+```{r}
+Box.test(res1, type="Lj") 
+```
+
+Kadangi p-value < 0.05, tai H0 hipotezę atmetame. Paklaidos nėra baltasis triukšmas, kaip ir rodė ACF grafikas.
+
+**_ibmclose_**
+```{r}
+Box.test(res2, type="Lj")
+```
+
+Kadangi p-value > 0.05, tai H0 hipotezę priimame. Paklaidos yra baltasis triukšmas. Tai užtikrina ACF grafiku gautus rezultatus. 
+
+**_hsales_**
+```{r}
+Box.test(res3, type="Lj")
+```
+
+Kadangi p-value < 0.05, tai H0 hipotezę atmetame. Paklaidos nėra baltasis triukšmas.
+
