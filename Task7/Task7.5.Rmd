@@ -1,0 +1,80 @@
+---
+title: "Task 7.5"
+author: "Izabele Vilkinaite"
+date: '2016 m balandis 12 d '
+output: html_document
+---
+
+```{r}
+library(fpp)
+```
+
+##Užduotys
+5. Consider the sales of new one-family houses in the USA (Jan 1987 –
+Nov 1995). Data set: hsales. Do the following steps:
+
+**(a)**_Produce some plots of the data in order to become familiar with it._
+
+```{r}
+duom = hsales
+par(mfrow=c(2,1))
+plot(duom, main="hsales duomenų grafikas", font.main=6, col.main="firebrick4", xlab="Laikotarpis", ylab="Duomenys")
+monthplot(duom, main="hsales mėnesinis duomenų grafikas", font.main=6, col.main="firebrick4", xlab="Laikotarpis", ylab="Duomenys")
+```
+Duomenyse matoma sezoniškumo ir cikliškumo požymiai.
+
+**(b)**_Split the data into a training set and a test set, where the test set is the last two years of data._
+
+```{r}
+#Training set
+trainset = window(duom, end=1993.99)
+
+#Test set
+testset = window(duom, start=1994)
+```
+
+**(c)**_Try various benchmark methods to forecast the training set and compare the results on the test set. Which method did best?_
+
+```{r}
+plot(duom, main="Training set forecasts", font.main=6, col.main="firebrick4", xlab="Laikotarpis", ylab="Duomenys")
+lines(meanf(trainset, h=20)$mean, col="forestgreen", lwd=2)
+lines(naive(trainset, h=20)$mean, col="gold", lwd=2)
+lines(snaive(trainset, h=20)$mean, col="darkblue", lwd=2)
+lines(rwf(trainset, drift=T, h=20)$mean, col="firebrick4", lwd=2, lty=4)
+legend("topright", legend=c("Mean", "Naive", "Seasonal naive", "Drift"), col=c("forestgreen", "gold", "darkblue", "firebrick4"), lwd=2, cex = 0.5)
+```
+
+Grafikas rodo visus keturis prognozių metodus pritaikytus training set. Tikrosios reikšmės taip pat parodytos. Šiam periodui apskaičiuosime prognozių tikslumą.
+
+```{r}
+accuracy(meanf(trainset, h=20), testset)
+accuracy(naive(trainset, h=20), testset)
+accuracy(snaive(trainset, h=20), testset)
+accuracy(rwf(trainset, drift=T, h=20), testset)
+```
+
+Iš grafiko matėme, kad geriausiai prognozes parodė seasonal naive metodas. Tačiau patikrinus prognozių tikslumą, geriau yra naudoti naive arba drift metodus. Kadangi jie beveik sutampa, rinksimės drift metodą, nes įvertinamas ir duomenų vidurkio pokytis.
+ 
+**(d)**_For the best method, compute the residuals and plot them. What do the plots tell you?_
+
+```{r}
+res = residuals(rwf(trainset, drift=T,  h=20))
+par(mfrow=c(2,1))
+plot(res, main="hsales duomenų paklaidos", xlab="Laikotarpis", ylab="Paklaidos")
+Acf(res, main="hsales paklaidų autokoreliacijos")
+```
+
+ACF grafikas rodo, kad daugelyje lagų autokoreliacijos yra reikšmingos, todėl jos nėra baltasis triukšmas. Įsitikinkime Ljung-Box testu:
+
+H0: paklaidos yra baltasis triukšmas.
+H1: paklaidos nėra baltasis triukšmas.
+
+```{r}
+Box.test(res, type="Lj")
+```
+
+Kadangi p-value < 0.05, tai H0 hipotezę atmetame. Paklaidos vis dėlto tikrai nėra baltasis triukšmas. 
+
+**(e)**_Can you invent a better forecasting method than any of the benchmark methods for these data?_
+
+Taip, galime, kadangi paklaidose matoma, kad jos nėra baltasis triukšmas.Vadinasi paklaidoe yra likusi informacija reikalinga apskaičiuojant prognozes.  
