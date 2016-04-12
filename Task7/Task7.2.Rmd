@@ -45,7 +45,7 @@ plot(res1, main="bricksq paklaidos", xlab="Laikotarpis", ylab="Paklaidos")
 Acf(res1, main="bricksq paklaidų autokoreliacijos")
 ```
 
-Grafike matoma, kad autokoreliacijos reikšmės aiškiai yra už 95% balto triukšmo autokoreliacijos ribos daugelyje lagų. Vadinasi paklaidos nėra baltas triukšmas. Seasonal naive metodas neįvertina duomenyse esančio trendo ir cikliškumo.
+Grafike matoma, kad autokoreliacijos reikšmės aiškiai yra už 95% pasikliovinimo intervalo ribos daugelyje lagų. Vadinasi paklaidos nėra baltas triukšmas. Seasonal naive metodas neįvertina duomenyse esančio trendo ir cikliškumo.
 
 ```{r}
 #ibmclose paklaidos ir ACF
