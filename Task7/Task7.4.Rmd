@@ -1,0 +1,74 @@
+---
+title: "Task7.4"
+author: "Izabele Vilkinaite"
+date: '2016 m balandis 12 d '
+output: html_document
+---
+
+```{r}
+library(fpp)
+```
+
+##Užduotys
+4. Consider the daily closing IBM stock prices (data set ibmclose). Do the following steps:
+
+**(a)** _Produce some plots of the data in order to become familiar with it._
+
+```{r}
+duom = ibmclose
+plot(duom, main="ibmclose duomenų grafikas", font.main=6, col.main="firebrick4", xlab="Laikotarpis", ylab="Duomenys")
+```
+
+**(b)** _Split the data into a training set of 300 observations and a test set of 69 observations._
+
+```{r}
+#Training set
+train = window(duom, end=300)
+
+#Test set 
+test = window(duom, start=301)
+```
+
+**(c)** _Try various benchmark methods to forecast the training set and compare the results on the test set. Which method did best?_
+
+```{r}
+plot(duom, main="Training set forecasts",  font.main=6, col.main="firebrick4", xlab="Laikotarpis", ylab="Duomenys")
+lines(meanf(train, h=69)$mean, col="forestgreen", lwd=2) #h turi būti lygus test imties ilgiui
+lines(naive(train, h=69)$mean, col="gold", lwd=2)
+lines(snaive(train, h=69)$mean, col="darkblue", lwd=2, lty=4)
+lines(rwf(train, drift=T, h=69)$mean, col="firebrick4", lwd=2)
+legend("topright", legend=c("Mean", "Naive", "Seasonal naive", "Drift"), col=c("forestgreen", "gold", "darkblue", "firebrick4"), lwd=2, cex = 0.7)
+```
+
+Grafike išbrėžti visi keturi prognozių metodai pritaikyti ibmclose training set. Tikrosios reikšmės taip pat parodytos. Matoma, kad šiuose duomenyse nėra sezoniškumo, todėl šio metodo galime ir nenaudoti. Remiantis grafiko pateikta informacija, galime daryti prielaidą, kad drift ir naive metodai prognozes parodo tinkamiausiai. Patikrinkime:
+
+```{r}
+accuracy(meanf(train, h=69), test)
+accuracy(naive(train, h=69), test)
+accuracy(rwf(train, drift=T, h=69), test)
+```
+Spėjimas pasitvirtina. Drift ir naive metodai rodo panašią prognozę. Drift metodas atsižvelgia į didelį duomenų kitimą ir staigų mažėjimą, todėl prognozės išlieka panašios. O naive metodas išlaiko šiokį tokį stabilumą, nes duomenys ne tik mažėjo, bet ir didėjo. Šiuo aspektu paliekamas naive metodas kaip geriausias.
+
+**(d)** _For the best method, compute the residuals and plot them. What do the plots tell you?_
+
+```{r}
+res = residuals(naive(train, h=69))
+par(mfrow=c(2,1))
+plot(res, main="ibmclose duomenų paklaidos", xlab="Laikotarpis", ylab="Duomenys")
+Acf(res, main="ibmclose paklaidų autokoreliacijos")
+```
+
+ACF grafikas rodo, kad vos kelios autokoreliacijos, esančios už 95% pasikliovimo intervalo ribos, yra reikšmingos. Paklaidos labai panašios į baltąjį triukšmą. Atlikime Ljung-Box testą:
+
+H0: paklaidos yra baltasis triukšmas.    
+H1: paklaidos nėra baltasis triukšmas.
+
+```{r}
+Box.test(res, type="Lj")
+```
+
+Kadangi p-value < 0.05, tai H0 hipotezę atmetame. Visgi paklaidos nėra baltasis triukšmas.
+
+**(d)** _Can you invent a better forecasting method than any of the benchmark methods for these data?_
+
+Nors gauti rezultatai rodo, kad paklaidos nėra baltasis triukšmas, tačiau yra labai arti tokio rezultato. Todėl šiems duomenims pasirinktas naive metodas nėra toks prastas variantas. 
