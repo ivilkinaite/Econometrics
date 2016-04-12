@@ -66,7 +66,7 @@ Acf(res, main="hsales paklaidų autokoreliacijos")
 
 ACF grafikas rodo, kad daugelyje lagų autokoreliacijos yra reikšmingos, todėl jos nėra baltasis triukšmas. Įsitikinkime Ljung-Box testu:
 
-H0: paklaidos yra baltasis triukšmas.
+H0: paklaidos yra baltasis triukšmas.  
 H1: paklaidos nėra baltasis triukšmas.
 
 ```{r}
