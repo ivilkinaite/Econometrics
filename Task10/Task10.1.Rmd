@@ -1,0 +1,79 @@
+```{r}
+library(fpp)
+```
+
+##Užduotis 
+###Lab session 3
+
+1. For this exercise, use the price of a dozen eggs in the United States from 1900–1993 (data set eggs). Experiment with the various options in the holt() function to see how much the forecasts change with damped or exponential trend. Also try changing the parameter values for **alpha** and **beta** to see how they affect the forecasts. Try to develop an intuition of what each parameter and argument is doing to the forecasts.  
+[Hint: use h=100 when calling holt() so you can clearly see the differences between the various options when plotting the forecasts.]    
+Which model gives the best RMSE?  
+Do the residuals from the best model look like white noise?  
+
+```{r}
+library(fpp)
+duom = eggs
+plot(duom, main="Duomenų grafikas")
+```
+
+Išbrėžus duomenų grafiką matomas cikliškumas ir ilgo laikotarpio mažėjantis trendas. 
+Sukuriame kelis modelius su holt() funkcija.
+
+```{r}
+fit1 = holt(duom, h = 100, alpha=0.8, beta=0.001, damped = TRUE)
+plot(fit1, main="Prognozės su damped trendu")
+lines(fitted(fit1), col="green")
+```
+
+Su damped trendu išbrėžti duomenys beveik atitinka tikruosius, tačiau pasirinkus pakankamai didelį alphą ir mažą betą, prognozuojami duomenys neįgauna akivaizdžiai duomenyse matomo mažėjančio trendo, išlieka pastovūs. 
+
+```{r}
+fit2 = holt(duom, h = 100, alpha=0.3, beta=0.008, damped = TRUE)
+plot(fit2, main="Prognozės su damped trendu")
+lines(fitted(fit2), col="red")
+```
+
+Su damped trendu, turinčiu pakankamai mažus alpha ir beta, išbrėžti duomenys labiau suglodinami, ne toks ryškus cikliškumas. Prognozuojami duomenys taip pat įgauna tendenciją mažėti, ko iš turimų duomenų labiausiai ir tikimes. Šis variantas gali prasčiau atitikti turimus duomenis, bet prognozavimo atžvilgiu gali būti pakankamai geras. 
+
+```{r}
+fit3 = holt(duom, h = 100, alpha=0.8, beta=0.008, exponential = TRUE, initial="simple")
+plot(fit3, ylim=c(0,400), main="Prognozės su eksponentiniu trendu")
+lines(fitted(fit3), col="blue")
+```
+
+Su eksponentiniu trendu, turinčiu didelį alphą ir mažą betą, išbrėžti duomenys ne mažai skiriasi nuo tikrųjų reikšmių. Taip pat prognozės neatrodo labai realios šiuo atveju: pasikliovimo intervalas platus, duomenys pakankamai sparčiai didėja. 
+
+```{r}
+fit4 = holt(duom, h = 100, alpha=0.9, beta=0.09, exponential = TRUE, initial="simple")
+plot(fit4, ylim=c(0,400), main="Prognozės su eksponentiniu trendu")
+lines(fitted(fit4), col="orange")
+```
+
+Su eksponentiniu trendu, turinčiu kiek didesnį alphą ir betą, išbrėžti duomenys yra arti realiųjų reikšmių, tačiau prognozuojami duomenys įgyją labai didelį pasikliovimo intervalą. Tai gali būti dėl blogo modelio pavyzdžio arba duomenyse esančio triukšmo. 
+
+Patiktrinkime, kuris modelis iš pateiktų yra geriausias (šiuo atveju turi mažiausią RMSE).
+
+```{r}
+accuracy(fit1)
+accuracy(fit2)
+accuracy(fit3)
+accuracy(fit4)
+```
+
+Geriausias modelis yra fit1 su damped trendu. Patikrinamos šio modelio liekanos.
+
+```{r}
+Acf(fit1$residuals, main="fit1 modelio paklaidos")
+```
+
+Matoma, kad liekanos yra labai panašios į baltąjį triukšmą. Įsitikiname su Ljung-Box testu:  
+
+H0: paklaidos yra baltasis triukšmas.  
+H1: paklaidos nėra baltasis triukšmas.  
+
+```{r}
+Box.test(fit1$residuals, type="Lj")
+```
+
+Kadangi p-value > 0.05, tai H0 hipotezę priimame. Paklaidos yra baltasis triukšmas, todėl sukurtas modelis yra geras. 
+
