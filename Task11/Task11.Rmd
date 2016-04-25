@@ -17,7 +17,7 @@ fitcast = forecast(fit)
 plot(fitcast, main="ETS(M,N,N) modelio prognozės", col.main="firebrick4", font.main=6)
 ```
 
-Matoma, kad apie 10 metų prognozuojami duomenys išlieka vienodi. Patikrinamos šio modelios liekanos.
+Matoma, kad apie 10 metų prognozuojami duomenys išlieka vienodi. Patikrinamos šio modelios paklaidos.
 
 ```{r}
 Acf(fit$residuals, main="fit modelio paklaidos")
