@@ -72,7 +72,7 @@ H0: paklaidos yra baltasis triukšmas.
 H1: paklaidos nėra baltasis triukšmas.   
 
 ```{r}
-Box.test(fit1$residuals)
+Box.test(fit1$residuals, type="Lj")
 ```
 
 Kafangi p-value > 0.05, tai H0 hipotezę priimame. fit1 modelio paklaidos ištikrųjų yra baltasis triukšmas. 
