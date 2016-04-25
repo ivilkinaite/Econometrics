@@ -1,0 +1,78 @@
+##Užduotis 
+###Lab Session 3
+
+2. For this exercise, use the monthly Australian short-term overseas visitors data, May 1985–April 2005. (Data set: visitors.) Do the following steps:
+
+**(a)** _Make a time plot of your data and describe the main features of the series._
+
+```{r}
+library(fpp)
+duom = visitors
+duom1 = decompose(visitors) #Decompose funkcija atskiria laiko eilutės duomenis į tris komponetes: 
+                            #trendo, sezoniškumo ir nereguliarumo. 
+plot(duom1)
+```
+
+Grafike matoma, kad duomenyse vyrauja vis didėjantis trendas ir ryškus sezoniškumas.
+
+**(b)** _Forecast the next two years using Holt-Winters’ multiplicative method._
+
+```{r}
+fit = hw(duom, h=24, seasonal = "multiplicative")
+plot(fit, plot.conf=F, fcol="White")
+lines(fitted(fit), col="red")
+lines(fit$mean, col="red")
+```
+
+Šio metodo prognozės yra daromos, atsižvelgiant į faktorių - trendo ir sezoniškumo - priklausomybę. Didėjant trendui, duomenų sezoniniai svyravimai taip pat didėja. 
+
+**(c)** _Why is multiplicative seasonality necessary here?_
+
+```{r}
+duom2 = window(duom, start=1997, end=2002.99)
+duom2
+plot(duom2, xlab="Laikotarpis", ylab="Duomenys", main="1997-2002 metų duomenys", col.main="firebrick4", font.main=6)
+```
+
+Remiantis pateiktais 1997-2002 metų duomenimis, matoma, kad daugiausiai lankytojų sulaukiama gruodžio mėnesį, o mažiausiai gegužės mėnesį. Tiek remiantis grafiku, tiek aritmetiniais skaičiavimais, skirtumas tarp didžiausios ir mažiausios reikšmės svyruoja, tačiau iš lėto didėja, vadinasi didėjant trendui, sezoniniai svyravimai taip pat didėja. Tai įrodo tinkamą multiplikatyvaus metodo panaudojimą.
+
+**(d)** _Experiment with making the trend exponential and/or damped._
+
+```{r}
+par(mfrow=c(2,1))
+fit1 = hw(duom, h=24, seasonal = "multiplicative", damped=TRUE)
+plot(fit1, main="Holt-Winters multiplikatyvaus metodo su damped trendu prognozės", col.main="firebrick4", font.main=6)
+lines(fitted(fit1), col=2)
+fit2 = hw(duom, h=24, seasonal = "multiplicative", exponential=TRUE)
+plot(fit2, main="Holt-Winters multiplikatyvaus metodo su eksponentiniu trendu prognozės", col.main="firebrick4", font.main=6)
+lines(fitted(fit2), col=3)
+```
+
+Modelyje pridėjus damped trendą, prognozėse nebelieka didėjančio trendo, O pridėjus eksponentinį trendą, prognozės išlieka panašios į pradinio modelio. 
+
+**(e)** _Compare the RMSE of the one-step forecasts from the various methods. Which do you prefer?_
+
+```{r}
+accuracy(fit)
+accuracy(fit1)
+accuracy(fit2)
+```
+
+Rezultatai rodo, kad mažiausią RMSE turi fit1 modelis, kurį pasirenkame tolimesnei analizei. 
+
+**(f)** _Check that the residuals from the best model look like white noise._
+
+```{r}
+Acf(fit1$residuals, main="fit1 modelio paklaidos")
+```
+
+Iš grafiko paklaidos matomai yra labai panašios į baltąjį triukšmą. Įsitikiname su Box.test:  
+
+H0: paklaidos yra baltasis triukšmas.    
+H1: paklaidos nėra baltasis triukšmas.   
+
+```{r}
+Box.test(fit1$residuals)
+```
+
+Kafangi p-value > 0.05, tai H0 hipotezę priimame. fit1 modelio paklaidos ištikrųjų yra baltasis triukšmas. 
