@@ -75,4 +75,4 @@ H1: paklaidos nėra baltasis triukšmas.
 Box.test(fit1$residuals, type="Lj")
 ```
 
-Kafangi p-value > 0.05, tai H0 hipotezę priimame. fit1 modelio paklaidos ištikrųjų yra baltasis triukšmas. 
+Kafangi p-value > 0.05, tai H0 hipotezę priimame. fit1 modelio paklaidos iš tikrųjų yra baltasis triukšmas. 
