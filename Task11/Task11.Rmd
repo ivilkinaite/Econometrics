@@ -6,7 +6,7 @@
 ```{r}
 library(fpp)
 duom = eggs
-fit = ets(eggs)
+fit = ets(duom)
 fit
 ```
 
