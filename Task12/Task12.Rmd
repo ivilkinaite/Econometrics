@@ -1,0 +1,79 @@
+##Užduotis
+###Lab Session 5b
+
+1. For this exercise, use the monthly Australian short-term overseas visitors data, May 1985–April 2005. (Data set: visitors in expsmooth package.). Do the following steps:
+
+**(a)** _Use ets to find the best model for these data and record the training set RMSE. You should find that the best model is ETS(M,A,M)._
+
+```{r}
+library(fpp)
+library(expsmooth)
+data = visitors
+plot(data,  main="Duomenų grafikas", xlab="Laikotarpis", ylab="Duomenys", col.main="firebrick4", font.main=6)
+```
+
+Duomenyse yra akivaizdus didėjantis trendas ir sezoniškumas. Su ets() ieškome geriausio modelio šiems duomenims.
+
+```{r}
+trainingset = window(data, end=2001.3)
+fit = ets(trainingset)
+accuracy(fit)[2]        #RMSE
+```
+
+Kaip ir turėjome tikėtis, geriausias modelis yra E(M,A,M): multiplicative Holt-Winters’ method
+with multiplicative errors.
+
+**(b)** _We will now check how much larger the one-step RMSE is on out-of-sample data using time series cross-validation. The following code will compute the result, beginning with four yearsof data in the training set._
+
+```{r}
+k = 48               # minimum size for training set
+n = length(visitors) # Total number of observations
+e = visitors*NA      # Vector to record one-step forecast errors
+for(i in 48:(n-1)){
+ train = ts(visitors[1:i],freq=12)
+ fit = ets(train, "MAM", damped=FALSE)
+ fc = forecast(fit,h=1)$mean
+ e[i] = visitors[i+1]-fc  #randamos paklaidos tarp tikrųjų reikšmių ir prognozuojamų
+}
+sqrt(mean(e^2,na.rm=TRUE))
+```
+
+Gauname šiek tiek didesnį RMSE.
+
+**(c)** _What would happen in the above loop if I had set train <- visitors[1:i]?_
+
+Šiuo atveju gauname, kad `fit = ets(train, "MAM", damped=FALSE)`, priklausantis nuo `train = visitors[1:i]`, nėra skaičiuojamas, išmetama klaida. Kadangi `train = visitors[1:i]` yra atskiros reikšmės be sezoniškumo, tai įtaką daro pasirinktas "MAM" modelis funkcijoje ets(). 
+
+**(d)** _Plot e. What do you notice about the error variances? Why does this occur?_
+
+```{r}
+plot(e, xlab="Laikotarpis")
+abline(0,0, col="red")
+```
+
+Pastebima, kad paklaidų sklaida darosi vis didesnė, todėl jų dispersija nėra pastovi, galimas heteroskedastiškumas. Įtakos gali turėti išskirtys arba vidurkio kitimas, nes kiekvienais metais pastebimas vis didėjantis lankytojų skaičius su kuriuo proporcingai didėja ir dispersija.
+
+**(e)** _How does this problem bias the comparison of the RMSE values from (1a) and (1b)? (Hint: think about the effect of the missing values in e.)_
+
+1a RMSE - `14.00545`, 1b RMSE - `18.73602`. Gauname, kad 1b RMSE yra didesnė nei 1b. Įtaką daro ne vienodas duomenų skaičius: 1a - 192 reikšmių, o 1b - 48 reikšmės ir skiriasi keturgubai. RMSE atsižvelgia į turimus duomenis ir prognozes, todėl su didesniu skaičiu duomenų, prognozės gaunamos geresnės ir paklaidos yra mažesnės.
+
+**(f)** _In practice, we will not know that the best model on the wholedata set is ETS(M,A,M) until we observe all the data. So a more realistic analysis would be to allow ets to select a different model each time through the loop. Calculate the RMSE using this approach._
+
+```{r}
+k <- 48              
+n <- length(visitors)
+e <- visitors*NA      
+for(i in 48:(n-1)){
+ train <- ts(visitors[1:i],freq=12)
+ fit <- ets(train)
+ fc <- forecast(fit,h=1)$mean
+ e[i] <- visitors[i+1]-fc
+}
+sqrt(mean(e^2,na.rm=TRUE))
+```
+
+Šiuo atveju gaunamas RMSE `18.97897`.
+
+**(g)** _How does the RMSE computed in (1f) compare to that computed in (1b)? Does the re-selection of a model at each step make much difference?_
+
+1b RMSE - `18.73602`, 1f RMSE - `18.97897`. Matoma, kad skaičiuojant kiekviename žingsnyje ar iš karto pasirinkus modelį, RMSE skiriasi labai nedaug, todėl nėra didelio skirtumo kurį metodą rinktis.
