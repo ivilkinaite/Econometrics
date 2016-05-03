@@ -1,0 +1,232 @@
+
+##Užduotis
+###Lab Session 6
+
+```{r}
+library(fpp)
+```
+
+####1. For the following series, find an appropriate Box-Cox transformation and order of differencing in order to obtain stationary data.
+
+**(a)** _usnetelec_
+
+```{r}
+duoma = usnetelec
+
+#Box-Cox transformacijai randamas atitinkamas lambda
+alambda = BoxCox.lambda(duoma)
+
+#Pritaikoma Box-Cox transformacija
+BCa = BoxCox(duoma, alambda)
+
+#Išbrėžiami originalūs duomenys ir duomenys po transformacijos
+par(mfrow=c(2,1))
+plot(duoma, main = "Usnetelec duomenų grafikas", col.main="firebrick4", font.main=6, xlab="Laikotarpis")
+plot(BCa, main = "Usnetelec duomenų grafikas po transformacijos", col.main="firebrick4", font.main=6, xlab="Laikotarpis")
+```
+
+Matoma, kad po transformacijos duomenų išsidėstymas nežymiai pakito. Didelės reikšmės ši transformacija neturi, kadangi duomenyse nėra didelių svyravimų, kuriuos būtų įmanoma suslopinti.
+Stacionariems duomenims gauti, pritaikysime duomenų diferencijavimą ir patikrinsime jį su  Kwiatkowski-Phillips-Schmidt-Shin testu:
+
+H0: Duomenys stacionarūs;  
+H1: Duomenys ne stacionarūs.
+
+```{r}
+difa = ndiffs(BCa) # kiek kartų diferencijuojami transformuoti duomenys
+difduoma = diff(BCa, differences = difa) # diferencijuojami duomenys
+kpss.test(difduoma) 
+plot(difduoma, main = "Išdiferencijuotų duomenų grafikas", col.main="firebrick4", font.main=6, xlab="Laikotarpis")
+```
+
+Atlikus Kwiatkowski-Phillips-Schmidt-Shin testą, gaunama, kad p-value > 0.05, vadinasi H0 hipotezę priimame. Duomenys yra stacionarūs atlikus antros eilės diferencijavimą. Tai matoma ir iš išbrėžto grafiko: duomenyse matomas cikliškumas, jokio trendo ar sezoniškumo, duomenys išsidėstę horizontaliai su pastovia dispersija.
+
+**(b)** _usgdp_
+
+```{r}
+duomb = usgdp
+
+#Box-Cox transformacijai randamas atitinkamas lambda
+blambda = BoxCox.lambda(duomb)
+
+#Pritaikoma Box-Cox transformacija
+BCb = BoxCox(duomb, blambda)
+
+#Išbrėžiami originalūs duomenys ir duomenys po transformacijos
+par(mfrow=c(2,1))
+plot(duomb, main = "Usgdp duomenų grafikas", col.main="firebrick4", font.main=6, xlab="Laikotarpis")
+plot(BCb, main = "Usgdp duomenų grafikas po transformacijos", col.main="firebrick4", font.main=6, xlab="Laikotarpis")
+```
+
+Šiuose duomenyse nėra jokių didelių svyravimų, po transformacijos duomenys beveik nepakito. 
+Pritaikomas duomenų diferencijavimas ir Kwiatkowski-Phillips-Schmidt-Shin testas.
+
+```{r}
+difb = ndiffs(BCb) # kiek kartų diferencijuojami tranformuoti duomenys
+difduomb = diff(BCb, differences = difb) # diferencijuojami duomenys
+kpss.test(difduomb) 
+plot(difduoma, main = "Išdiferencijuotų duomenų grafikas", col.main="firebrick4", font.main=6, xlab="Laikotarpis")
+```
+
+Grafike matomi horizontaliai išsidėstę duomenys, vyrauja cikliškumas. Atlikus testą, gaunama, kad p-value > 0.05, vadinasi H0 hipoteze galime priimti. Duomenys yra stacionarūs atlikus pirmos eilės diferencijavimą. 
+
+**(c)** _mcopper_
+
+```{r}
+duomc = mcopper
+
+#Box-Cox transformacijai randamas atitinkamas lambda
+clambda = BoxCox.lambda(duomc)
+
+#Pritaikoma Box-Cox transformacija
+BCc = BoxCox(duomc, clambda)
+
+#Išbrėžiami originalūs duomenys ir duomenys po transformacijos
+par(mfrow=c(2,1))
+plot(duomc, main = "Mcopper duomenų grafikas", col.main="firebrick4", font.main=6, xlab="Laikotarpis")
+plot(BCc, main = "Mcopper duomenų grafikas po transformacijos", col.main="firebrick4", font.main=6, xlab="Laikotarpis")
+```
+
+Po transformacijos duomenyse yra šiek tiek sumažinami svyravimai, duomenys atrodo reguliaresni. Tikriname ar duomenyse vyrauja sezoniškumas:
+
+```{r}
+Acf(duomc)
+```
+
+Remiantis Acf grafiku, duomenyse sezoniškumo nėra. Pritaikomas duomenų diferencijavimas ir Kwiatkowski-Phillips-Schmidt-Shin testas.
+
+```{r}
+difc = ndiffs(BCc) # kiek kartų diferencijuojami tranformuoti duomenys
+difduomc = diff(BCc, differences = difc) # diferencijuojami duomenys
+kpss.test(difduomc) 
+plot(difduomc, main = "Išdiferencijuotų duomenų grafikas", col.main="firebrick4", font.main=6, xlab="Laikotarpis")
+abline(0,0, col="red")
+```
+
+Atlikę duomenų diferencijavimą ir Kwiatkowski-Phillips-Schmidt-Shin testą, gauname, kad p-value > 0.05, vadinasi H0 hipotezę priimame - duomenys yra stacionarūs atlikus pirmos eilės diferencijavimą. 
+
+**(d)** _enplanements_
+
+```{r}
+duomd = enplanements
+
+#Box-Cox transformacijai randamas atitinkamas lambda
+dlambda = BoxCox.lambda(duomd)
+
+#Pritaikoma Box-Cox transformacija
+BCd = BoxCox(duomd, dlambda)
+
+#Išbrėžiami originalūs duomenys ir duomenys po transformacijos
+par(mfrow=c(2,1))
+plot(duomd, main = "Enplanements duomenų grafikas", col.main="firebrick4", font.main=6, xlab="Laikotarpis")
+plot(BCd, main = "Enplanements duomenų grafikas po transformacijos", col.main="firebrick4", font.main=6, xlab="Laikotarpis")
+```
+
+Po transformacijos labiau išlyginamas duomenų sezoniškumas: kiekvienais metais turi panašius svyravimus tik vis auktesniame lygyje. Patikriname duomenų sezoniškumą:
+
+```{r}
+Acf(duomd)
+```
+
+Matomas pastovus bangavimas, kur aukščiausiai pasiekiamos reikšmės yra metų pabaigose. Duomenyse iš tiesų vyrauja sezoniškumas. Pritaikomas duomenų diferencijavimas ir Kwiatkowski-Phillips-Schmidt-Shin testas.
+
+```{r}
+difd = nsdiffs(BCd) # kiek kartų diferencijuojami tranformuoti duomenys
+difduomd = diff(BCd, differences = difd) # diferencijuojami duomenys
+kpss.test(difduomd) 
+plot(difduomd, main = "Išdiferencijuotų duomenų grafikas", col.main="firebrick4", font.main=6, xlab="Laikotarpis")
+abline(0,0, col="red")
+```
+
+Grafike matoma, kad duomenys yra stacionarūs. Atlikus testą, gauname, kad p-value > 0.05, vadinasi H0 hipotezę priimame - duomenys iš tiesų yra stacionarūs atlikus pirmos eilės diferencijavimą. 
+
+**(e)** _visitors_ 
+
+```{r}
+duome = visitors 
+
+#Box-Cox transformacijai randamas atitinkamas lambda
+elambda = BoxCox.lambda(duome)
+
+#Pritaikoma Box-Cox transformacija
+BCe = BoxCox(duome, elambda)
+
+#Išbrėžiami originalūs duomenys ir duomenys po transformacijos
+par(mfrow=c(2,1))
+plot(duome, main = "Visitors duomenų grafikas", col.main="firebrick4", font.main=6, xlab="Laikotarpis")
+plot(BCe, main = "Visitors duomenų grafikas po transformacijos", col.main="firebrick4", font.main=6, xlab="Laikotarpis")
+```
+
+Matoma, kad po transformacijos duomenys yra labiau suglodinami, sezoniškumas reguliaresnis kiekvienais metais, Tikrinamas duomenų sezoniškumas:
+
+```{r}
+Acf(duome)
+```
+
+Matomas mažėjantis bangavimas, kur aukščiausios reikšmės pasiekiamos metų pabaigose. Duomenyse vyrauja sezoniškumas. Pritaikomas duomenų diferencijavimas ir Kwiatkowski-Phillips-Schmidt-Shin testas.
+
+```{r}
+dife = nsdiffs(BCe) # kiek kartų diferencijuojami tranformuoti duomenys
+difduome = diff(BCe, differences = dife) # diferencijuojami duomenys
+kpss.test(difduome) 
+plot(difduome, main = "Išdiferencijuotų duomenų grafikas", col.main="firebrick4", font.main=6, xlab="Laikotarpis")
+abline(0,0, col="red")
+```
+
+Matoma, kad duomenys išsidėstę horizontaliai su vienoda sklaida. Atlikus Kwiatkowski-Phillips-Schmidt-Shin testą, gavome, kad p-value > 0.05, vadinasi duomenys tikrai yra stacionarūs atlikus pirmos eilės diferencijavimą. 
+
+
+####2. Why is a Box-Cox transformation unhelpful for the cangas data?
+
+```{r}
+duomf = cangas
+
+#Box-Cox transformacijai randamas atitinkamas lambda
+flambda = BoxCox.lambda(duomf)
+
+#Pritaikoma Box-Cox transformacija
+BCf = BoxCox(duomf, flambda)
+
+#Išbrėžiami originalūs duomenys ir duomenys po transformacijos
+par(mfrow=c(2,1))
+plot(duomf, main = "Cangas duomenų grafikas", col.main="firebrick4", font.main=6, xlab="Laikotarpis")
+plot(BCf, main = "Cangas duomenų grafikas po transformacijos", col.main="firebrick4", font.main=6, xlab="Laikotarpis")
+```
+
+Box-Cox tranformacija padeda slopinti didelius svyravimus, o šiuose duomenyse jie atsiranda tik viduryje, todėl sunku pritaikyti vienodą transformaciją visiems duomenims ir ji tampa nereikšminga. 
+
+####3. Download the data at http://robjhyndman.com/data/retail.xls. Choose one of the series and find an appropriate Box-Cox transformation and order of differencing in order to obtain stationary data.
+
+```{r}
+data = read.csv2("retail.csv", header = T)
+laikoeil = data[,20] 
+duom = ts(laikoeil, frequency = 12, start = c(1982,4))
+plot(duom)
+
+#Box-Cox transformacijai randamas atitinkamas lambda
+lambda3 = BoxCox.lambda(duom)
+
+#Pritaikoma Box-Cox transformacija
+BC3 = BoxCox(duom, lambda3)
+
+#Išbrėžiami originalūs duomenys ir duomenys po transformacijos
+par(mfrow=c(2,1))
+plot(duom, main = "Duomenų grafikas", col.main="firebrick4", font.main=6, xlab="Laikotarpis")
+plot(BC3, main = "Visitors duomenų grafikas po transformacijos", col.main="firebrick4", font.main=6, xlab="Laikotarpis")
+```
+Matoma, kad duomenyse tranformacija nieko nepakeitė. Tikrinamas duomenų sezoniškumas:
+
+```{r}
+Acf(duom)
+```
+
+Pagal ACF grafiką, duomenyse sezoniškumo nematyti. Pritaikomas duomenų diferencijavimas ir Kwiatkowski-Phillips-Schmidt-Shin testas.
+
+```{r}
+dif3 = ndiffs(BC3) # kiek kartų diferencijuojami tranformuoti duomenys
+difduom3 = diff(BC3, differences = dif3) # diferencijuojami duomenys
+kpss.test(difduom3) 
+plot(difduom3, main = "Išdiferencijuotų duomenų grafikas", col.main="firebrick4", font.main=6, xlab="Laikotarpis")
+abline(0,0, col="red")
+```
+
+Grafikas rodo, kad duomenys yra panašūs į stacionarius. Atlikus Kwiatkowski-Phillips-Schmidt-Shin testą, gauta, kad p-value > 0.0į, vadinasi HO hipotezę priimame. Duomenys iš tiesų yra stacionarūs atlikus pirmos eilės diferencijavimą.
