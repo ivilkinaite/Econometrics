@@ -229,4 +229,4 @@ plot(difduom3, main = "Išdiferencijuotų duomenų grafikas", col.main="firebric
 abline(0,0, col="red")
 ```
 
-Grafikas rodo, kad duomenys yra panašūs į stacionarius. Atlikus Kwiatkowski-Phillips-Schmidt-Shin testą, gauta, kad p-value > 0.0į, vadinasi HO hipotezę priimame. Duomenys iš tiesų yra stacionarūs atlikus pirmos eilės diferencijavimą.
+Grafikas rodo, kad duomenys yra panašūs į stacionarius. Atlikus Kwiatkowski-Phillips-Schmidt-Shin testą, gauta, kad p-value > 0.05, vadinasi HO hipotezę priimame. Duomenys iš tiesų yra stacionarūs atlikus pirmos eilės diferencijavimą.
