@@ -1,0 +1,102 @@
+##Užduotis
+###Lab Session 7
+
+```{r}
+library(fpp)
+library(forecast)
+```
+
+####1. Do the following steps for the wmurders data.
+
+**(a)** _if necessary, find a suitable Box-Cox transformation for the data;_
+
+```{r}
+duom1 = wmurders
+plot(duom1, main = "wmurders duomenų grafikas", col.main="firebrick4", font.main=6, ylab="Duomenys", xlab="Laikotarpis")
+```
+
+Duomenų grafike matomas pakankamai staigus pakilimas 1960-1975 metais ir kritimas 1995-2000 metais. Duomenyse ryškus cikliškumas. Todėl šiuo atveju Box-Cox tranformacijos nėra tikslo pritaikyti. 
+
+**(b)** _fit a suitable ARIMA model to the transformed data using auto.arima();_
+
+```{r}
+auto.arima(duom1)
+```
+
+Siūlomas variantas yra ARIMA(1,2,1). Patikrinsime šio modelio paklaidas ir atliksime Ljung-Box testą su hipotezėmis:
+
+H0: paklaidos yra baltasis triukšmas;  
+H1: paklaidos nėra baltasis triukšmas.
+
+```{r}
+fit1 = Arima(duom1, order=c(1,2,1))
+Acf(residuals(fit1), main="")
+Box.test(residuals(fit1), type="Lj")
+```
+
+Kadangi p-value > 0.05, tai H0 hipotezę priimame. Vadinasi ACF grafiko ir testo rezultatai sutampa - paklaidos yra baltasis triukšmas.
+
+**(c)** _try some other plausible models by experimenting with the orders chosen;_
+
+```{r}
+# Duomenys padaromi stacionarūs
+dif1 = ndiffs(duom1)
+fit11 = diff(duom1, differences = dif1)
+plot(fit11, main="Išdiferencijuotų duomenų grafikas", font.main=6, col.main="firebrick4", xlab="Laikotarpis")
+abline(0,0, col=2)
+```
+
+Duomenys atrodo stacionarūs. Patikriname su Dickey-Fuller testu:
+
+H0: duomenys nėra stacionarūs;  
+H1: duomenys yra stacionarūs.
+
+```{r}
+adf.test(fit11)
+```
+
+Kadangi p-value < 0.05, tai H0 hipotezę atmetame. Duomenys yra stacionarūs. Išbrėžiame ACF/PACF grafikus.
+
+```{r}
+par(mfrow=c(2,1))
+Acf(fit11, main="")
+Pacf(fit11, main="")
+```
+
+Atsižvelgus į ACF/PACF grafikus, AR(0) ir MA(2) yra galimos reikšmės modeliams sudaryti.
+
+```{r}
+fit2 = Arima(duom1, order=c(0,2,2))
+fit3 = Arima(duom1, order=c(0,2,1))
+fit4 = Arima(duom1, order=c(0,2,0))
+```
+
+**(d)** _choose what you think is the best model and check the residual diagnostics;_
+
+Geriausią modelį tikrinsime pagal AICc. 
+
+```{r}
+fit1[15]
+fit2[15]
+fit3[15]
+fit4[15]
+```
+
+Remiantis gautais rezultatais, geriausias modelis atrodo fit1, kuris buvo parinktas su auto.arima(). Šio modelio paklaidos buvo patikrintos **(b)** dalyje - jos yra baltasis triukšmas, todėl galima tolimesnė modelio analizė. 
+
+**(e)** _produce forecasts of your fitted model. Do the forecasts look reasonable?_
+
+```{r}
+plot(forecast(fit1), font.main=6, col.main="firebrick4")
+```
+
+Grafike matoma, kad prognozės linkusios vien kristi ir galbūt pasiekti net mažiausią moterų nužudymo skaičių per visus stebimus metus. Tai realu, kadangi daug faktorių gali daryti įtakos tokiam mažėjančiam skaičiui, todėl prognozės atrodo tinkamos.
+
+**(f)** _compare the results with what you would obtain using ets() (with no transformation)._
+
+```{r}
+fit5 = ets(duom1)
+plot(forecast(fit5), font.main=6, col.main="firebrick4")
+```
+
+Prognozės padarytos be tranformacijos išlieka stabilios, todėl galbūt galima tikėtis ne tokių kardinalių pokyčių kaip su tranformuotais duomenimis. Tačiau atsižvelgiant į tai, kad duomenyse vyrauja nepastovumas, labiau tikimasi kintančių,o ne pastovių prognozių ateityje. 
