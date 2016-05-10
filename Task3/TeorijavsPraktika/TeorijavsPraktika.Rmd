@@ -1,75 +1,77 @@
----
-title: "Task 3"
-author: "Izabele Vilkinaite"
-date: "2016 m. vasaris 29 d."
-output: html_document
----
-
 ## Teorija Vs Praktika
 
 Ridename 4 kauliukus. Suskaičiuokite jų teorinį skirstinį ir patikrinkite jį su empiriniu skirstiniu, gautu Monte Carlo metodu.
 
 #### Teorinis skirstinys
 
+Matricos principu pirma apskaičiuojamas dviejų kauliukų teorinis skirstinys, kuris bus pritaikomas apskaičiuojant keturių kauliukų teorinį skirstinį. 
+
 ```{r}
+# Sudaroma dviejų kauliukų matrica su iškritusių akučių sumomis
+valuesMat1 = outer(1:6, 1:6, "+")  
+valuesMat1
 
-#Sudaroma keturių kauliukų matrica su iškritusių akučių sumomis
+# Kiekvieno kauliuko reikšmei priskiriamos tikimybės ir jos sudauginamos
+probMat1 = outer(rep(1/6, 6), rep(1/6, 6))
+probMat1
+
+# Skaičiuojamos iškritusių akučių sumos tikimybės
+Tikimybe1=tapply(as.vector(probMat1), as.vector(valuesMat1), sum)
+Tikimybe1
+
+# Gautos sumos tikimybės sudedamos į vektorių
+prob2kaul = as.vector(Tikimybe1)
+```
+
+Dabar apskaičiuojamas keturių kauliukų teorinis skirstinys tuo pačiu matricos principu. Idėja yra išskirstyti po du kauliukus į horizontalią ir vertikalią padėtis, todėl kiekvienoje padėtyje naudosime dviejų kauliukų teorinius skirstinius.
+
+```{r}
+# Sudaroma keturių kauliukų matrica su iškritusių akučių sumomis
 valuesMat2 = outer(2:12, 2:12, "+") 
-
-#Kiekvienos reikšmės tikimybės
-probMat2 = outer(rep(1/36, 11), rep(1/36, 11), "*")
-
-#Iškritusių akučių sumos tikimybės
-Tikimybe=tapply(as.vector(probMat2), as.vector(valuesMat2), sum)
-
-#Bendra gautų rezultatų lentelė
-ts2=data.frame(Tikimybe) 
-ts2["Asuma"] <- c(4:24) 
-ts2 <- ts2[c(2,1)]
-
+valuesMat2
+# Tiek vertikalioms, tiek horizontalioms reikšmėms priskiriamos dviejų kauliukų teorinio skirstinio reikšmės ir sudauginamos
+probMat2 = outer(prob2kaul, prob2kaul)
+probMat2
+# Suskaičiuojamos iškritusių akučių sumos tikimybės
+Tikimybe2=tapply(as.vector(probMat2), as.vector(valuesMat2), sum)
+Tikimybe2
 ```
 
 #### Empyrinis skirstinys
 
 ```{r} 
-
-#Funkcija, kuri išmeta 4 kauliukų akučių sumą 
 rollDice <- function(){  
- sum(sample(1:6, size=4 , replace=TRUE)) 
+ sum(sample(1:6, size=4 , replace=TRUE)) #Funkcija, kuri išmeta 4 kauliukų akučių sumą 
 }
 
-# Gaunama 1000 tokių sumų
-y = replicate(1000, rollDice()) 
+y = replicate(10000, rollDice()) # Gaunama 10000 tokių sumų
+
 # Suskaičiuojama kiek vienodų sumų iškrito 
 tb=table(y) 
 
 # Kiekvienos sumos iškritimo tikimybės
 es=tb/sum(tb) 
-
-#Bedra gautų rezultatų lentelė
-es2=data.frame(es)
-colnames(es2)=c("Asuma", "Tikimybe")
 ```
 
 ### Palyginimas
 
 ```{r}
-x = ts2$Asuma
+# Lentelė
+ts2=data.frame(Tikimybe2)
+es2=data.frame(es)
+lentele = cbind(es2,ts2)
+colnames(lentele) = c("AkuciuSuma", "Empyrinis", "Teorinis")
+AkuciuSuma = as.numeric(as.character(lentele$AkuciuSuma)) # Akučių sumos stulpelio reikšmės paverčiamos iš vardinių į skaitines
+lentele
 
-# Funkcija, kuri parodo norimos iškritusios sumos teorinę tikimybę
-teorinis <- function(x){   
-  ts2[ts2$Asuma == x, ]
-}
-
-y = es2$Asuma
-
-# Funkcija, kuri parodo norimos iškritusios sumos empyrinę tikimybę
-empyrinis <- function(y){  
-  es2[es2$Asuma == y,]
-}
-
-# Įrašoma norima iškritusių akučių suma
-
-empyrinis(y)  
-teorinis(x)
+#Grafikas
+hist(y, xlim=c(4,24), xlab="Akučių suma", main="Teorija vs Praktika", probability = T)
+lines(AkuciuSuma, lentele$Empyrinis, col=4, lwd=2)
+lines(AkuciuSuma, lentele$Teorinis, col=2, lwd=2)
+legend("topright", legend=c("Empyrinis skirstinys", "Teorinis skirstinys"), col=c(4,2), lwd=2, cex=0.6)
 ```
+
+Lentelėje pateikti duomenys ir išbrėžtas grafikas rodo, kad teorinis ir empyrinis skirstiniai beveik sutampa.  
+
+
+
