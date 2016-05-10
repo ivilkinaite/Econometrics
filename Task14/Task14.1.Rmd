@@ -88,7 +88,7 @@ rownames(lentele) = c("fit1", "fit2", "fit3", "fit4")
 kable(lentele)
 ```
 
-Rezultatai rodo, kad rodikliai apytikriai visuose svyruoja panašiai, todėl geriausią modelį išsirinksime pagal AICc. 
+Rezultatai rodo, kad rodikliai apytikriai visuose modeliuose svyruoja panašiai, todėl geriausią modelį išsirinksime pagal AICc. 
 
 ```{r}
 ats = rbind(
