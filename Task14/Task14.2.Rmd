@@ -4,6 +4,7 @@
 ```{r}
 library(fpp)
 library(forecast)
+library(knitr)
 ```
 
 ####2. Do the following steps for the usgdp data.
@@ -15,8 +16,7 @@ duom2 = usgdp
 plot(duom2, main = "usgdp duomenų grafikas", col.main="firebrick4", font.main=6, xlab="Laikotarpis")
 ```
 
-Duomenyse matomas duomenų nepastovumas su didėjančiu trendu, todėl šiuo atveju duomenims taikysime Box-Cox transformaciją.
-
+Duomenyse matomas nepastovumas su didėjančiu (panašiu į eksponentinį) trendu, todėl šiuo atveju duomenims taikysime Box-Cox transformaciją siekiant reguleresnio kilimo duomenų sklaidai suvienodinti.   
 ```{r}
 lambda2 = BoxCox.lambda(duom2)
 BC2 = BoxCox(duom2, lambda2)
@@ -31,9 +31,9 @@ auto.arima(BC2)
 Siūlomas variantas yra ARIMA(2,1,0). Patikrinsime šio modelio paklaidas ir atliksime Ljung-Box testą.
 
 ```{r}
-fit11 = Arima(BC2, order=c(2,1,0))
-Acf(residuals(fit11), main="")
-Box.test(residuals(fit11), type="Lj")
+fit12 = Arima(BC2, order=c(2,1,0))
+Acf(residuals(fit12), main="")
+Box.test(residuals(fit12), type="Lj")
 ```
 
 Kadangi p-value > 0.05, tai H0 hipotezę priimame. Vadinasi ACF grafiko ir testo rezultatai sutampa - paklaidos yra baltasis triukšmas.
@@ -42,52 +42,71 @@ Kadangi p-value > 0.05, tai H0 hipotezę priimame. Vadinasi ACF grafiko ir testo
 
 ```{r}
 # Sudaromi stacionarūs duomenys
+
 dif2 = ndiffs(BC2)
-fit22 = diff(BC2, differences = dif2)
-plot(fit22, main="Išdiferencijuotų duomenų grafikas", font.main=6, col.main="firebrick4", xlab="Laikotarpis")
+fitdif = diff(BC2, differences = dif2)
+plot(fitdif, main="Išdiferencijuotų duomenų grafikas", font.main=6, col.main="firebrick4", xlab="Laikotarpis")
 abline(0,0, col=2)
 ```
 
 Duomenys atrodo stacionarūs. Patikriname su Dickey-Fuller testu.
 
 ```{r}
-adf.test(fit22)
+adf.test(fitdif)
 ```
 
 Kadangi p-value < 0.05, tai H0 hipotezę atmetame. Duomenys iš tiesų yra stacionarūs atlikus pirmos eilės diferencijavimą. Išbrėžaime ACF/PACF grafikus.
 
 ```{r}
 par(mfrow=c(2,1))
-Acf(fit22, main="")
-Pacf(fit22, main="")
+Acf(fitdif, main="")
+Pacf(fitdif, main="")
 ```
 
 Atsižvelgus į ACF/PACF grafikus, AR(0) ir MA(2) yra galimos reikšmės modeliams sudaryti.
 
 ```{r}
 fit22 = Arima(BC2, order=c(0,1,2))
-fit33 = Arima(BC2, order=c(0,1,1))
-fit44 = Arima(BC2, order=c(0,1,0))
-fit55 = Arima(BC2, order=c(1,1,1))
+fit32 = Arima(BC2, order=c(0,1,1))
+fit42 = Arima(BC2, order=c(0,1,0))
+fit52 = Arima(BC2, order=c(1,1,1))
 ```
 
 **(d)** _choose what you think is the best model and check the residual diagnostics;_
 
-Geriausią modelį tikrinsime pagal AICc. 
+Pirma patikrinsime modelių tikslumą su `accuracy` funkcija. Sudaroma visų modelių gautų rezultatų lentelė.
 
 ```{r}
-fit11[15]
-fit22[15]
-fit33[15]
-fit44[15]
-fit55[15]
+lentele2 = rbind(
+  accuracy(fit12),
+  accuracy(fit22),
+  accuracy(fit32),
+  accuracy(fit42),
+  accuracy(fit52)
+)
+rownames(lentele2) = c("fit12", "fit22", "fit32", "fit42", "fit52")
+kable(lentele2)
 ```
 
-Remiantis gautais rezultatais, geriausias modelis atrodo fit55. Patikrinsime šio modelio paklaidas ir atliksime Ljung-Box testą.
+Rezultatai rodo, kad visais rodikliais geriausias modelis yra fit52. Pasitikriname pagal AICc.
 
 ```{r}
-Acf(residuals(fit55), main="")
-Box.test(residuals(fit55), type="Lj")
+ats2 = rbind(
+  fit12[15],
+  fit22[15],
+  fit32[15],
+  fit42[15],
+  fit52[15]
+)
+rownames(ats2) = c("fit12", "fit22", "fit32", "fit42", "fit52")
+kable(ats2)
+```
+
+Gauti rezultatai įrodo, kad geriausias modelis yra fit52. Patikrinsime šio modelio paklaidas ir atliksime Ljung-Box testą.
+
+```{r}
+Acf(residuals(fit52), main="")
+Box.test(residuals(fit52), type="Lj")
 ```
 
 ACF grafikas rodo, kad paklaidos yra panašios į baltąjį triukšmą. Taip pat testo p-value > 0.05, vadinasi H0 hipotezę priimame - paklaidos yra baltasis triukšmas.
@@ -96,8 +115,8 @@ ACF grafikas rodo, kad paklaidos yra panašios į baltąjį triukšmą. Taip pat
 
 ```{r}
 par(mfrow=c(2,1))
-plot(forecast(fit55, h=20), font.main=6, col.main="firebrick4")
-plot(forecast(fit55, h=60), font.main=6, col.main="firebrick4")
+plot(forecast(fit52, h=20), font.main=6, col.main="firebrick4")
+plot(forecast(fit52, h=60), font.main=6, col.main="firebrick4")
 ```
 
 Palyginus įvairaus periodo prognozes, matoma, kad trumpesniame laikotarpyje dar numatomas nedidelis duomenų augimas pereinantis į pastovumą, kuris išryškėja ilgesnio periodo prognozėse. Šiuo atveju prognozės atrodo logiškos ir tinkamos atsižvelgiant į turimų duomenų visumą. 
@@ -105,10 +124,10 @@ Palyginus įvairaus periodo prognozes, matoma, kad trumpesniame laikotarpyje dar
 **(f)** _compare the results with what you would obtain using ets() (with no transformation)._
 
 ```{r}
-fit66 = ets(BC2)
+fit62 = ets(BC2)
 par(mfrow=c(2,1))
-plot(forecast(fit66, h=20), font.main=6, col.main="firebrick4")
-plot(forecast(fit66, h=60), font.main=6, col.main="firebrick4")
+plot(forecast(fit62, h=20), font.main=6, col.main="firebrick4")
+plot(forecast(fit62, h=60), font.main=6, col.main="firebrick4")
 ```
 
-Prognozės atrodo lygiai tokios pat kaip ir su tranformuotais duomenimis. 
+Prognozės gaunamos panašios kaip ir su transformuotais duomenimis. Šiuo atveju tarp gautų modelių ARIMA(1,1,1) ir ETS(A, Ad, N) yra lygiavertiškas santykis. 
