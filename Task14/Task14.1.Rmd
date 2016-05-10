@@ -4,6 +4,7 @@
 ```{r}
 library(fpp)
 library(forecast)
+library(knitr)
 ```
 
 ####1. Do the following steps for the wmurders data.
@@ -34,14 +35,15 @@ Acf(residuals(fit1), main="")
 Box.test(residuals(fit1), type="Lj")
 ```
 
-Kadangi p-value > 0.05, tai H0 hipotezę priimame. Vadinasi ACF grafiko ir testo rezultatai sutampa - paklaidos yra baltasis triukšmas.
+Kadangi p-value > 0.05, tai H0 hipotezę priimame. Vadinasi ACF grafiko ir testo rezultatai sutampa - paklaidos yra baltasis triukšmas. 
 
 **(c)** _try some other plausible models by experimenting with the orders chosen;_
 
 ```{r}
 # Duomenys padaromi stacionarūs
-dif1 = ndiffs(duom1)
-fit11 = diff(duom1, differences = dif1)
+
+dif1 = ndiffs(duom1)                    # diferencijavimo eilė
+fit11 = diff(duom1, differences = dif1) # duomenų išdiferencijavimas
 plot(fit11, main="Išdiferencijuotų duomenų grafikas", font.main=6, col.main="firebrick4", xlab="Laikotarpis")
 abline(0,0, col=2)
 ```
@@ -59,11 +61,11 @@ Kadangi p-value < 0.05, tai H0 hipotezę atmetame. Duomenys yra stacionarūs. I�
 
 ```{r}
 par(mfrow=c(2,1))
-Acf(fit11, main="")
+Acf(fit11, main="")   
 Pacf(fit11, main="")
 ```
 
-Atsižvelgus į ACF/PACF grafikus, AR(0) ir MA(2) yra galimos reikšmės modeliams sudaryti.
+ACF grafikas rodo reikšmingas koreliacijas pirmuose lag1 ir lag2, o PACF - nė viename. Todėl atsižvelgus į šiuos grafikus, AR(0) ir MA(2) yra galimos reikšmės modeliams sudaryti.
 
 ```{r}
 fit2 = Arima(duom1, order=c(0,2,2))
@@ -73,16 +75,34 @@ fit4 = Arima(duom1, order=c(0,2,0))
 
 **(d)** _choose what you think is the best model and check the residual diagnostics;_
 
-Geriausią modelį tikrinsime pagal AICc. 
+Pirma patikrinsime modelių tikslumą su `accuracy` funkcija. Sudaroma visų modelių gautų rezultatų lentelė.
 
 ```{r}
-fit1[15]
-fit2[15]
-fit3[15]
-fit4[15]
+lentele = rbind(
+  accuracy(fit1),
+  accuracy(fit2),
+  accuracy(fit3),
+  accuracy(fit4)
+)
+rownames(lentele) = c("fit1", "fit2", "fit3", "fit4")
+kable(lentele)
 ```
 
-Remiantis gautais rezultatais, geriausias modelis atrodo fit1, kuris buvo parinktas su auto.arima(). Šio modelio paklaidos buvo patikrintos **(b)** dalyje - jos yra baltasis triukšmas, todėl galima tolimesnė modelio analizė. 
+Rezultatai rodo, kad rodikliai apytikriai visuose svyruoja panašiai, todėl geriausią modelį išsirinksime pagal AICc. 
+
+```{r}
+ats = rbind(
+  fit1[15],
+  fit2[15],
+  fit3[15],
+  fit4[15]
+)
+rownames(ats) = c("fit1", "fit2", "fit3", "fit4")
+kable(ats)
+```
+
+Remiantis gautais rezultatais, geriausias modelis atrodo fit1, kuris buvo parinktas su auto.arima().
+Šio modelio paklaidos buvo patikrintos **(b)** dalyje - jos yra baltasis triukšmas, todėl galima tolimesnė modelio analizė. 
 
 **(e)** _produce forecasts of your fitted model. Do the forecasts look reasonable?_
 
@@ -96,7 +116,9 @@ Grafike matoma, kad prognozės linkusios vien kristi ir galbūt pasiekti net ma�
 
 ```{r}
 fit5 = ets(duom1)
+Box.test(residuals(fit5), type="Lj")
 plot(forecast(fit5), font.main=6, col.main="firebrick4")
 ```
 
 Prognozės padarytos be tranformacijos išlieka stabilios, todėl galbūt galima tikėtis ne tokių kardinalių pokyčių kaip su tranformuotais duomenimis. Tačiau atsižvelgiant į tai, kad duomenyse vyrauja nepastovumas, labiau tikimasi kintančių,o ne pastovių prognozių ateityje. 
+
