@@ -119,15 +119,15 @@ plot(forecast(fit52, h=20), font.main=6, col.main="firebrick4")
 plot(forecast(fit52, h=60), font.main=6, col.main="firebrick4")
 ```
 
-Palyginus įvairaus periodo prognozes, matoma, kad trumpesniame laikotarpyje dar numatomas nedidelis duomenų augimas pereinantis į pastovumą, kuris išryškėja ilgesnio periodo prognozėse. Šiuo atveju prognozės atrodo logiškos ir tinkamos atsižvelgiant į turimų duomenų visumą. 
+Palyginus įvairaus periodo prognozes, matoma, kad trumpesniame laikotarpyje dar numatomas nedidelis duomenų augimas pereinantis į pastovumą, kuris išryškėja ilgesnio periodo prognozėse. Atsižvelgus į bendrą duomenų pasiskirstymą, juose matomas ne tik kilimas, bet ir trumpalaikiai pastovumai, todėl prognozės trumpuoju laikotarpiu atrodo tinkamos ir logiškos.
 
 **(f)** _compare the results with what you would obtain using ets() (with no transformation)._
 
 ```{r}
-fit62 = ets(BC2)
+fit62 = ets(duom2)
 par(mfrow=c(2,1))
 plot(forecast(fit62, h=20), font.main=6, col.main="firebrick4")
 plot(forecast(fit62, h=60), font.main=6, col.main="firebrick4")
 ```
 
-Prognozės gaunamos panašios kaip ir su transformuotais duomenimis. Šiuo atveju tarp gautų modelių ARIMA(1,1,1) ir ETS(A, Ad, N) yra lygiavertiškas santykis. 
+ETS(A,A,N) modelio prognozės išlaiko duomenų kilimą tiek trumpesniu tiek ilgesniu laikotarpiu. Šiuo atveju prognozės taip pat realios, kadangi duomenims ypač būdingas tendencingas kilimas.  
