@@ -1,0 +1,107 @@
+##Užduotis
+###Lab Session 8
+
+```{r}
+library(fpp)
+library(forecast)
+library(knitr)
+```
+
+####1. Do the following steps for the `hsales` data.
+
+**(a)** _Do the data need transforming? If so, find a suitable transformation._
+
+```{r}
+duom = hsales
+tsdisplay(duom, main = "hsales duomenų grafikas", col.main="firebrick4", font.main=6, xlab="Laikotarpis")
+```
+
+Duomenyse matomas ryškus sezoniškumas ir cikliškumas, todėl šiems duomenims taikyti transformaciją nėra tikslo.
+
+**(b)** _Are the data stationary? If not, find an appropriate differencing which yields stationary data._
+
+Duomenyse esantis sezoniškumas panaikina stacionarumo formą, todėl duomenis diferencijuosime.
+
+```{r}
+duom1 = diff(duom, lag=12)
+adf.test(duom1, alternative = "stationary")
+```
+
+Atlikę ADF testą, gauname, kad p-value > 0.05. Vadinasi išdiferencijavus vieną kartą duomenys neįgijo stacionarumo. Diferencijuojame du kartus.
+
+```{r}
+duom2 = diff(duom, lag=12, differences = 2)
+adf.test(duom2, alternative = "stationary")
+```
+
+Šį kartą gauname, kad duomenys yra stacionarūs. 
+
+**(c)** _Identify a couple of ARIMA models that might be useful in describing the time series. Which of your models is the best according to their AIC values?_ 
+
+* Pirma patikrinsime duomenų diferencijavimo rodiklį D.
+
+```{r}
+nsdiffs(duom)
+```
+
+* Išbrėžiame ACF/PACF grafikus AR ir MA reikšmėms fiksuoti.
+
+```{r}
+par(mfrow=c(2,1))
+acf(duom2, main = "")
+pacf(duom2, main = "")
+```
+
+Siūlomos reikšmės:   
+  * ne sezoniai rodikliai: AR(0) ir MA(9);  
+  * sezoniai rodikliai: AR(1) ir MA(6).  
+
+* Sudaromi galimi modeliai. 
+
+```{r}
+fit1 = Arima(duom, order=c(0,2,9), seasonal=c(1,0,0))
+fit2 = Arima(duom, order=c(0,2,9), seasonal=c(0,0,6))
+fit3 = Arima(duom, order=c(0,2,0), seasonal=c(1,0,0))
+fit4 = Arima(duom, order=c(0,2,0), seasonal=c(0,0,6))
+```
+
+* Patikriname modelius pagal AIC.
+
+```{r}
+best = rbind(
+  fit1[6],
+  fit2[6],
+  fit3[6],
+  fit4[6]
+)
+rownames(best) = c("fit1", "fit2", "fit3", "fit4")
+kable(best)
+```
+
+Matome, kad geriausias modelis yra fit2. 
+
+**(d)** _Estimate the parameters of your best model and do diagnostic testing on the residuals. Do the residuals resemble white noise? If not, try to find another ARIMA model which fits better._
+
+```{r}
+acf(residuals(fit2))
+Box.test(residuals(fit2), type="Lj")
+```
+
+Kadangi testo p-value > 0.05, tai H0 hipotezę priimame. Modelio paklaidos yra baltasis triukšmas. 
+
+**(e)** _Forecast the next 24 months of data using your preferred model._
+
+```{r}
+plot(forecast(fit2, h=24), main = "ARIMA(0,2,9)(0,0,6) modelio prognozės", col.main="firebrick4", font.main=6)
+```
+
+Prognozėse matomas sezoninis pastovumas su reguliaresnėmis reikšmėmis - mažėjantis atstumas tarp aukščiausių ir žemiausių sezono reikšmių.
+
+**(f)** _Compare the forecasts obtained using ets()._
+
+```{r}
+fit5 = ets(duom)
+plot(forecast(fit5), main = "ETS(M,Ad,M) modelio prognozės", col.main="firebrick4", font.main=6)
+```
+
+Šio modelio prognozėse išlieka panašus atotrūkis tarp aukščiusių ir žemiausių sezono reikšmių, numatomas pastovumas. Atsižvelgus į turimų duomenų išsidėstymą abiejų modelių prognozės atrodo tinkamos ir geros.   
