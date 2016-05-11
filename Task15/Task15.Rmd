@@ -53,8 +53,8 @@ pacf(duom2, main = "")
 ```
 
 Siūlomos reikšmės:   
-  * ne sezoniai rodikliai: AR(0) ir MA(9);  
-  * sezoniai rodikliai: AR(1) ir MA(6).  
+  * ne sezoniai rodikliai p,q: AR(0) ir MA(9);  
+  * sezoniai rodikliai P,Q: AR(1) ir MA(6).  
 
 * Sudaromi galimi modeliai. 
 
