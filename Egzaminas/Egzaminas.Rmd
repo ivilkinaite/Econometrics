@@ -1,0 +1,194 @@
+---
+title: "egzaminas"
+author: "Izabele Vilkinaite"
+date: '2016 m birželis 15 d '
+output: html_document
+---
+
+```{r}
+library(car)
+library(fpp)
+library(dynlm)
+library(knitr)
+library(psych)
+library(dplyr)
+```
+####1 užduotis
+
+
+
+
+####2 užduotis
+
+1) Duomenų apžvalga ir paruošimas.
+**(a)**
+```{r}
+data = read.csv2(file="data.csv", header = T)
+dat = as.data.frame(lapply(data,as.numeric))
+attach(dat)
+```
+Ištrintos reikšmių eilutės, kuriuose yra Na, todėl pašalintos 4 duomenų eilutės ir duomenys išsaugomi `data.csv` faile. 
+
+**(b)**
+Ieškoma išskirčių
+```{r}
+mod1 = lm(islaidosVaisiams ~ butinosIslaidos + pajamos + rajonoId + atstumasIkiParduotuves, data=dat)
+outlierTest(mod1)
+```
+
+Matoma, kad išskirtis yra 401, todėl ją išmetame iš duomenų
+```{r}
+new.data = dat[-401,]
+```
+Šie duomenys bus naudojami tolimesnei analizei.
+
+**(c)**
+```{r}
+plot(new.data)
+summary(new.data)
+cor(new.data)
+```
+Tarp kintamųjų stiprios koreliacijos nematyti.
+
+**(d)**
+Išskiriami duomenys į du masyvus
+```{r}
+trainSet = sample_frac(new.data, 0.8)
+sid = as.numeric(rownames(trainSet)) 
+testSet = new.data[-sid,]
+```
+
+2. Tiesinio modelio sudarymas  
+**(a)**
+```{r}
+mod2 = lm(islaidosVaisiams ~ butinosIslaidos + pajamos + rajonoId + atstumasIkiParduotuves, data=trainSet)
+par(mfrow=c(2,2))
+plot(mod2)
+```
+
+Matoma, kad modelis yra beveik tiesiškas.  
+**(b)** Tikrinamas duomenų reikšmingumas.
+```{r}
+summary(mod2)
+```
+
+Matoma, kad visų pirma yra nereikšmingas kintamasis `atstumasIkiParduotuves`, todėl jį išmetame.
+```{r}
+fit = lm(islaidosVaisiams ~ butinosIslaidos + pajamos + rajonoId, data=trainSet)
+summary(fit)
+```
+
+Pajamų kintamasis taip pat nereikšmingas, todėl taip pat išmetame.
+```{r}
+fit1 = lm(islaidosVaisiams ~ butinosIslaidos + rajonoId, data=trainSet)
+summary(fit1)
+```
+
+Visi kintamieji reikšmingi, todėl šis modelis bus naudojamas tolimesnei analizei.  
+
+**(c)** Patikrinamos modelio savybės
+* Multikolinearumas
+```{r}
+vif(fit1)
+```
+
+Kadangi visi vif < 10, tai modelyje nematoma multikolinearumo problema.
+
+* Heteroskedastiškumas  
+H0: modelis homoskedastiškas;  
+H1: modelis heteroskedastiškas;
+
+```{r}
+ncvTest(fit1)
+```
+
+Kadangi p-value > 0.05, tai H0 hipotezę priimame. Modelis yra homoskedastiškas.
+
+* Paklaidų normalumas
+H0: liekanų paklaidos yra normalios;  
+H1: liekanų paklaidos nėra normalios;
+```{r}
+shapiro.test(fit1$res)
+hist(fit1$res, xlab="mod3 paklaidos", main="fit1 paklaidų pasiskirstymas", probability = T)
+lines(density(fit1$res), col="firebrick", lwd=2)
+```
+
+Pagal testą, kadangi p-value < 0.05, tai H0 hipotezę atmetame. Vadinasi modelio paklaidos nėra normalios, ką įrodo ir išbrėžtas grafikas. 
+Pasekmės: 
+1) modelyje yra likusi naudinga informacija ir ne visa ji panaudota;
+2) modelis nėra pakankamai "geras", galima pagalvoti apie jo tobulinimą.
+
+3. Modelio tobulinimas
+**(a)**
+```{r}
+par(mfrow=c(1,2))
+plot(trainSet$butinosIslaidos, fit1$res, xlab = "butinosIslaidos duomenys", ylab = "fit1 paklaidos")
+lines(lowess(trainSet$butinosIslaidos, fit1$residuals), col="blue", lwd=2) 
+plot(trainSet$pajamos, fit1$residuals, xlab = "pajamų duomenys", ylab = "fit1 paklaidos")
+lines(lowess(trainSet$pajamos, fit1$residuals), col="red", lwd=2)
+```
+
+Matoma, kad abiem atvejais gaunama ne tiesinė priklausomybė tarp kintamųjų ir modelio paklaidų.
+
+
+
+
+
+####3 užduotis
+1. Duomenų paruošimas ir apžvalga
+```{r}
+dat = M1Germany
+data = na.omit(dat)
+
+mod = dynlm(data$logprice ~ L(data$loggnp, 1) + L(data$loggnp, 2), data=data)
+# su sezonine komponente nesigauna
+```
+
+**(b)** 
+```{r}
+ser = as.ts(mod$res)
+```
+
+**(c)** Tikrinamas liekanų stacionarumas. Dickey-Fuller testas su hipotezėmis:  
+H0: duomenys nėra stacionarūs;  
+H1: duomenys yra stacionarūs.
+```{r}
+adf.test(ser) 
+```
+
+Kadangi p-value > 0.05, tai H0 hipotezę priimame. Duomenys nėra stacionarūs, todėl atliekame skirtumų operacijas.  
+```{r}
+acf(ser) #duomenys sezoniniai
+ser1 = diff(ser, lag=1)
+adf.test(ser1, alternative = "stationary")
+```
+
+Kadangi p-value < 0.05, tai H0 hipotezę atmetame - paklaidos yra stacionarios. 
+
+**(d)**
+```{r}
+plot(ser)
+```
+
+Transformacijos taikyti nėra tikslo, kadangi duomenys yra nevienodai kintantys laike, nevienodi šuoliai. 
+
+2. Modeliavimas
+**(a)**
+```{r}
+mod1 = ets(ser)
+```
+
+Siūlomas modelis yra: ETS(A,N,A): A - additive errors, N - no trend, A - additive seasonal.
+
+**(b)** 
+
+
+**(c)**
+```{r}
+mod3 = auto.arima(ser)
+```
+ARIMA(3,1,2)(2,0,0) - p=3 - autoregresijos kintamasis       , P=2 - tie patys kintamieji, tik taikomi sezoniu atveju.
+                      d=1 - diferencijuojame vieną kartą    , D=0
+                      q=2 - slenkančio vidurkio kintamasis  , Q=0
+
+Eilės sutampa, diferencijavimus duomenis vieną kartą. 
